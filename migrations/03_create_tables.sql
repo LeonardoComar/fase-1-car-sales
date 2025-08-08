@@ -10,6 +10,8 @@ CREATE TABLE motor_vehicles (
     color VARCHAR(50),
     city VARCHAR(100),
     additional_description TEXT,
+    price INT UNSIGNED,
+    status VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -41,7 +43,7 @@ CREATE TABLE motorcycles (
 -- Tabela para imagens
 CREATE TABLE vehicle_images (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  vehicle_id BIGINT NOT NULL,
+  vehicle_id INT NOT NULL,
   filename VARCHAR(255) NOT NULL,
   path VARCHAR(500) NOT NULL,
   thumbnail_path VARCHAR(500),
