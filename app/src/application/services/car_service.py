@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from app.src.domain.ports.car_repository import CarRepositoryInterface
 from app.src.domain.entities.car_model import Car
 from app.src.domain.entities.motor_vehicle_model import MotorVehicle
@@ -231,6 +231,28 @@ class CarService:
         except Exception as e:
             logger.error(f"Erro ao ativar carro ID {car_id}: {str(e)}")
             raise Exception(f"Erro ao ativar carro: {str(e)}")
+    
+    async def get_active_cars_by_price(self) -> List[CarResponse]:
+        """
+        Busca todos os carros com status 'Ativo' ordenados por preço (menor para maior).
+        
+        Returns:
+            List[CarResponse]: Lista de carros ativos ordenados por preço
+        """
+        try:
+            logger.info("Buscando carros ativos ordenados por preço")
+            
+            cars = await self.car_repository.get_active_cars_by_price()
+            
+            # Converter para DTOs de resposta
+            responses = [self._car_to_response(car) for car in cars]
+            
+            logger.info(f"Encontrados {len(responses)} carros ativos")
+            return responses
+            
+        except Exception as e:
+            logger.error(f"Erro ao buscar carros ativos por preço: {str(e)}")
+            raise Exception(f"Erro ao buscar carros ativos: {str(e)}")
     
     def _car_to_response(self, car: Car) -> CarResponse:
         """

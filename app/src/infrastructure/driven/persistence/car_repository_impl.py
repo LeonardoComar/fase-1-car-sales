@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from typing import Optional
+from typing import Optional, List
 from app.src.domain.ports.car_repository import CarRepositoryInterface
 from app.src.domain.entities.car_model import Car
 from app.src.domain.entities.motor_vehicle_model import MotorVehicle
@@ -161,3 +161,36 @@ class CarRepository(CarRepositoryInterface):
         except Exception as e:
             logger.error(f"Erro inesperado ao deletar carro ID {car_id}: {str(e)}")
             raise Exception(f"Erro inesperado ao deletar carro: {str(e)}")
+
+    async def get_active_cars_by_price(self) -> List[Car]:
+        """
+        Busca todos os carros com status 'Ativo' ordenados por preço (menor para maior).
+        """
+        try:
+            with get_db_session() as session:
+                # Query que junta as tabelas motor_vehicle e car
+                # Filtra por status 'Ativo' e ordena por preço
+                query = session.query(Car).join(MotorVehicle).filter(
+                    MotorVehicle.status == 'Ativo'
+                ).order_by(MotorVehicle.price.asc())
+                
+                cars = query.all()
+                
+                # Carregar eager load dos relacionamentos para evitar lazy loading
+                for car in cars:
+                    # Forçar o carregamento do motor_vehicle
+                    _ = car.motor_vehicle.model
+                    
+                    # Fazer expunge para desconectar os objetos da sessão
+                    session.expunge(car.motor_vehicle)
+                    session.expunge(car)
+                
+                logger.info(f"Encontrados {len(cars)} carros ativos ordenados por preço")
+                return cars
+                
+        except SQLAlchemyError as e:
+            logger.error(f"Erro ao buscar carros ativos por preço: {str(e)}")
+            raise Exception(f"Erro ao buscar carros ativos: {str(e)}")
+        except Exception as e:
+            logger.error(f"Erro inesperado ao buscar carros ativos por preço: {str(e)}")
+            raise Exception(f"Erro inesperado ao buscar carros ativos: {str(e)}")

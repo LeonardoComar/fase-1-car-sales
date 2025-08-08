@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
+from typing import List
 from app.src.application.services.car_service import CarService
 from app.src.application.dtos.car_dto import CreateCarRequest, CarResponse
 from app.src.infrastructure.driven.persistence.car_repository_impl import CarRepository
@@ -54,6 +55,38 @@ async def create_car(
         )
     except Exception as e:
         logger.error(f"Erro interno ao criar carro via API: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro interno do servidor"
+        )
+
+
+@router.get("/list-cars-ordered-by-price", response_model=List[CarResponse])
+async def get_active_cars_ordered_by_price(
+    service: CarService = Depends(get_car_service)
+) -> List[CarResponse]:
+    """
+    Lista todos os carros com status 'Ativo' ordenados por preço (menor para maior).
+    
+    Args:
+        service: Serviço de carros (injetado)
+        
+    Returns:
+        List[CarResponse]: Lista de carros ativos ordenados por preço
+        
+    Raises:
+        HTTPException: 500 se erro interno
+    """
+    try:
+        logger.info("Recebida requisição para listar carros ativos ordenados por preço")
+        
+        cars = await service.get_active_cars_by_price()
+        
+        logger.info(f"Encontrados {len(cars)} carros ativos ordenados por preço")
+        return cars
+        
+    except Exception as e:
+        logger.error(f"Erro interno ao listar carros ativos ordenados por preço via API: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro interno do servidor"

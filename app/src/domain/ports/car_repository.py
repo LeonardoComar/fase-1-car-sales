@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, List
 from app.src.domain.entities.car_model import Car
 from app.src.domain.entities.motor_vehicle_model import MotorVehicle
 
@@ -65,5 +65,15 @@ class CarRepositoryInterface(ABC):
             
         Returns:
             bool: True se removido com sucesso, False caso contrário
+        """
+        pass
+
+    @abstractmethod
+    async def get_active_cars_by_price(self) -> List[Car]:
+        """
+        Busca todos os carros com status 'Ativo' ordenados por preço (menor para maior).
+        
+        Returns:
+            List[Car]: Lista de carros ativos ordenados por preço
         """
         pass
