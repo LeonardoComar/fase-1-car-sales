@@ -41,6 +41,7 @@ class CarService:
                 fuel_type=request.fuel_type,
                 color=request.color,
                 city=request.city,
+                price=request.price,
                 bodywork=request.bodywork,
                 transmission=request.transmission,
                 additional_description=request.additional_description
@@ -108,6 +109,7 @@ class CarService:
                 fuel_type=request.fuel_type,
                 color=request.color,
                 city=request.city,
+                price=request.price,
                 additional_description=request.additional_description
             )
             
@@ -250,6 +252,7 @@ class CarService:
             fuel_type=motor_vehicle.fuel_type,
             color=motor_vehicle.color,
             city=motor_vehicle.city,
+            price=motor_vehicle.price,
             additional_description=motor_vehicle.additional_description,
             status=motor_vehicle.status,
             bodywork=car.bodywork,

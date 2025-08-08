@@ -101,6 +101,7 @@ class CarRepository(CarRepositoryInterface):
                 existing_motor_vehicle.fuel_type = motor_vehicle.fuel_type
                 existing_motor_vehicle.color = motor_vehicle.color
                 existing_motor_vehicle.city = motor_vehicle.city
+                existing_motor_vehicle.price = motor_vehicle.price
                 existing_motor_vehicle.additional_description = motor_vehicle.additional_description
                 existing_motor_vehicle.status = motor_vehicle.status
                 

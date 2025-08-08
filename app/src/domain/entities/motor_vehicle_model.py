@@ -19,21 +19,25 @@ class MotorVehicle(Base):
     color = Column(String(50), nullable=False)
     city = Column(String(100), nullable=False)
     additional_description = Column(Text, nullable=True)
+    price = Column(Integer, nullable=False)
     status = Column(String(50), nullable=False, default='Ativo')
     created_at = Column(TIMESTAMP, default=func.current_timestamp())
     updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
 
     def __init__(self, model: str, year: str, mileage: int, fuel_type: str, 
-                 color: str, city: str, additional_description: Optional[str] = None, 
+                 color: str, city: str, price: int, additional_description: Optional[str] = None, 
                  status: str = 'Ativo', id: Optional[int] = None):
         if id is not None:
             self.id = id
+        if price <= 0:
+            raise ValueError("Price deve ser maior que zero")
         self.model = model
         self.year = year
         self.mileage = mileage
         self.fuel_type = fuel_type
         self.color = color
         self.city = city
+        self.price = price
         self.additional_description = additional_description
         self.status = status
 

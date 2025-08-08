@@ -27,7 +27,7 @@ class Car(Base):
 
     @classmethod
     def create_with_motor_vehicle(cls, model: str, year: str, mileage: int, fuel_type: str,
-                                  color: str, city: str, bodywork: str, transmission: str,
+                                  color: str, city: str, price: int, bodywork: str, transmission: str,
                                   additional_description: Optional[str] = None):
         """
         Método de classe para criar um carro com seu veículo base.
@@ -39,6 +39,7 @@ class Car(Base):
             fuel_type=fuel_type,
             color=color,
             city=city,
+            price=price,
             additional_description=additional_description,
             status="Ativo"  # Definindo status como "Ativo" para carros
         )
