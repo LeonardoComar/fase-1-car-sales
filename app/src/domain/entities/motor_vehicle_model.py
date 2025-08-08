@@ -19,11 +19,13 @@ class MotorVehicle(Base):
     color = Column(String(50), nullable=False)
     city = Column(String(100), nullable=False)
     additional_description = Column(Text, nullable=True)
+    status = Column(String(50), nullable=False, default='Ativo')
     created_at = Column(TIMESTAMP, default=func.current_timestamp())
     updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
 
     def __init__(self, model: str, year: str, mileage: int, fuel_type: str, 
-                 color: str, city: str, additional_description: Optional[str] = None, id: Optional[int] = None):
+                 color: str, city: str, additional_description: Optional[str] = None, 
+                 status: str = 'Ativo', id: Optional[int] = None):
         if id is not None:
             self.id = id
         self.model = model
@@ -33,6 +35,7 @@ class MotorVehicle(Base):
         self.color = color
         self.city = city
         self.additional_description = additional_description
+        self.status = status
 
     def __repr__(self):
         return f"<MotorVehicle(id={self.id}, model='{self.model}', year='{self.year}')>"

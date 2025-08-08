@@ -47,6 +47,7 @@ class CarResponse(BaseModel):
     color: str
     city: str
     additional_description: Optional[str]
+    status: str
     bodywork: str
     transmission: str
     created_at: str
@@ -64,6 +65,7 @@ class CarResponse(BaseModel):
                 "color": "Branco",
                 "city": "São Paulo",
                 "additional_description": "Carro em excelente estado de conservação",
+                "status": "Ativo",
                 "bodywork": "Sedan",
                 "transmission": "Automático",
                 "created_at": "2025-08-07T10:30:00",

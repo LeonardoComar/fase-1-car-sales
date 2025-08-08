@@ -102,6 +102,7 @@ class CarRepository(CarRepositoryInterface):
                 existing_motor_vehicle.color = motor_vehicle.color
                 existing_motor_vehicle.city = motor_vehicle.city
                 existing_motor_vehicle.additional_description = motor_vehicle.additional_description
+                existing_motor_vehicle.status = motor_vehicle.status
                 
                 # Atualizar campos do carro
                 existing_car.bodywork = car.bodywork

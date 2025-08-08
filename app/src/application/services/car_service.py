@@ -156,6 +156,43 @@ class CarService:
             logger.error(f"Erro ao remover carro ID {car_id}: {str(e)}")
             raise Exception(f"Erro ao remover carro: {str(e)}")
     
+    async def inactivate_car(self, car_id: int) -> Optional[CarResponse]:
+        """
+        Inativa um carro alterando seu status para 'Inativo'.
+        
+        Args:
+            car_id: ID do carro
+            
+        Returns:
+            Optional[CarResponse]: Dados do carro inativado ou None se não encontrado
+        """
+        try:
+            logger.info(f"Inativando carro ID: {car_id}")
+            
+            # Buscar o carro atual
+            current_car = await self.car_repository.get_car_by_id(car_id)
+            if not current_car:
+                logger.info(f"Carro não encontrado para inativação. ID: {car_id}")
+                return None
+            
+            # Criar entidade motor_vehicle com status 'Inativo', mantendo os outros dados
+            motor_vehicle = current_car.motor_vehicle
+            motor_vehicle.status = 'Inativo'
+            
+            # Atualizar no repositório
+            updated_car = await self.car_repository.update_car(car_id, motor_vehicle, current_car)
+            if not updated_car:
+                logger.info(f"Falha ao inativar carro. ID: {car_id}")
+                return None
+            
+            response = self._car_to_response(updated_car)
+            logger.info(f"Carro inativado com sucesso. ID: {car_id}")
+            return response
+            
+        except Exception as e:
+            logger.error(f"Erro ao inativar carro ID {car_id}: {str(e)}")
+            raise Exception(f"Erro ao inativar carro: {str(e)}")
+    
     def _car_to_response(self, car: Car) -> CarResponse:
         """
         Converte uma entidade Car para CarResponse.
@@ -177,6 +214,7 @@ class CarService:
             color=motor_vehicle.color,
             city=motor_vehicle.city,
             additional_description=motor_vehicle.additional_description,
+            status=motor_vehicle.status,
             bodywork=car.bodywork,
             transmission=car.transmission,
             created_at=motor_vehicle.created_at.isoformat() if motor_vehicle.created_at else "",

@@ -39,7 +39,8 @@ class Car(Base):
             fuel_type=fuel_type,
             color=color,
             city=city,
-            additional_description=additional_description
+            additional_description=additional_description,
+            status="Ativo"  # Definindo status como "Ativo" para carros
         )
         
         car = cls(
