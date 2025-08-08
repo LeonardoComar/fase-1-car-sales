@@ -230,3 +230,45 @@ async def inactivate_car(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro interno do servidor"
         )
+
+
+@router.patch("/{car_id}/active", response_model=CarResponse)
+async def activate_car(
+    car_id: int,
+    service: CarService = Depends(get_car_service)
+) -> CarResponse:
+    """
+    Ativa um carro alterando seu status para 'Ativo'.
+    
+    Args:
+        car_id: ID do carro
+        service: Serviço de carros (injetado)
+        
+    Returns:
+        CarResponse: Dados do carro ativado
+        
+    Raises:
+        HTTPException: 404 se não encontrado, 500 se erro interno
+    """
+    try:
+        logger.info(f"Recebida requisição para ativar carro ID: {car_id}")
+        
+        car_response = await service.activate_car(car_id)
+        if not car_response:
+            logger.info(f"Carro não encontrado para ativação via API. ID: {car_id}")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Carro não encontrado"
+            )
+        
+        logger.info(f"Carro ativado com sucesso via API. ID: {car_id}")
+        return car_response
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erro interno ao ativar carro via API. ID {car_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro interno do servidor"
+        )

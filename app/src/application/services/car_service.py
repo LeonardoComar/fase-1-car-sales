@@ -193,6 +193,43 @@ class CarService:
             logger.error(f"Erro ao inativar carro ID {car_id}: {str(e)}")
             raise Exception(f"Erro ao inativar carro: {str(e)}")
     
+    async def activate_car(self, car_id: int) -> Optional[CarResponse]:
+        """
+        Ativa um carro alterando seu status para 'Ativo'.
+        
+        Args:
+            car_id: ID do carro
+            
+        Returns:
+            Optional[CarResponse]: Dados do carro ativado ou None se não encontrado
+        """
+        try:
+            logger.info(f"Ativando carro ID: {car_id}")
+            
+            # Buscar o carro atual
+            current_car = await self.car_repository.get_car_by_id(car_id)
+            if not current_car:
+                logger.info(f"Carro não encontrado para ativação. ID: {car_id}")
+                return None
+            
+            # Criar entidade motor_vehicle com status 'Ativo', mantendo os outros dados
+            motor_vehicle = current_car.motor_vehicle
+            motor_vehicle.status = 'Ativo'
+            
+            # Atualizar no repositório
+            updated_car = await self.car_repository.update_car(car_id, motor_vehicle, current_car)
+            if not updated_car:
+                logger.info(f"Falha ao ativar carro. ID: {car_id}")
+                return None
+            
+            response = self._car_to_response(updated_car)
+            logger.info(f"Carro ativado com sucesso. ID: {car_id}")
+            return response
+            
+        except Exception as e:
+            logger.error(f"Erro ao ativar carro ID {car_id}: {str(e)}")
+            raise Exception(f"Erro ao ativar carro: {str(e)}")
+    
     def _car_to_response(self, car: Car) -> CarResponse:
         """
         Converte uma entidade Car para CarResponse.
