@@ -4,9 +4,9 @@ USE carsales;
 CREATE TABLE motor_vehicles (
     id INT PRIMARY KEY AUTO_INCREMENT,
     model VARCHAR(100),
-    year VARCHAR(20),
+    year VARCHAR(50),
     mileage INT,
-    fuel_type VARCHAR(20),
+    fuel_type VARCHAR(50),
     color VARCHAR(50),
     city VARCHAR(100),
     additional_description TEXT,
@@ -19,8 +19,8 @@ CREATE TABLE motor_vehicles (
 -- Tabela para carros
 CREATE TABLE cars (
     vehicle_id INT PRIMARY KEY,
-    bodywork VARCHAR(20),
-    transmission VARCHAR(20),
+    bodywork VARCHAR(50),
+    transmission VARCHAR(50),
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (vehicle_id) REFERENCES motor_vehicles(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -28,12 +28,12 @@ CREATE TABLE cars (
 -- Tabela para motos
 CREATE TABLE motorcycles (
     vehicle_id INT PRIMARY KEY,
-    starter VARCHAR(20),
-    fuel_system VARCHAR(20),
-    engine_displacement DECIMAL(8, 2) UNSIGNED,
-    cooling VARCHAR(20),
-    style VARCHAR(20),
-    engine_type VARCHAR(30),
+    starter VARCHAR(50),
+    fuel_system VARCHAR(50),
+    engine_displacement INT UNSIGNED,
+    cooling VARCHAR(50),
+    style VARCHAR(50),
+    engine_type VARCHAR(50),
     gears SMALLINT UNSIGNED,
     front_rear_brake VARCHAR(100),
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
