@@ -223,49 +223,49 @@ async def delete_car(
         )
 
 
-@router.patch("/{car_id}/inactive", response_model=CarResponse)
-async def inactivate_car(
+@router.patch("/{car_id}/deactivate", response_model=CarResponse)
+async def deactivate_car(
     car_id: int,
     service: CarService = Depends(get_car_service)
 ) -> CarResponse:
     """
-    Inativa um carro alterando seu status para 'Inativo'.
+    Desativa um carro alterando seu status para 'Inativo'.
     
     Args:
         car_id: ID do carro
         service: Serviço de carros (injetado)
         
     Returns:
-        CarResponse: Dados do carro inativado
+        CarResponse: Dados do carro desativado
         
     Raises:
         HTTPException: 404 se não encontrado, 500 se erro interno
     """
     try:
-        logger.info(f"Recebida requisição para inativar carro ID: {car_id}")
+        logger.info(f"Recebida requisição para desativar carro ID: {car_id}")
         
         car_response = await service.inactivate_car(car_id)
         if not car_response:
-            logger.info(f"Carro não encontrado para inativação via API. ID: {car_id}")
+            logger.info(f"Carro não encontrado para desativação via API. ID: {car_id}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Carro não encontrado"
             )
         
-        logger.info(f"Carro inativado com sucesso via API. ID: {car_id}")
+        logger.info(f"Carro desativado com sucesso via API. ID: {car_id}")
         return car_response
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Erro interno ao inativar carro via API. ID {car_id}: {str(e)}")
+        logger.error(f"Erro interno ao desativar carro via API. ID {car_id}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro interno do servidor"
         )
 
 
-@router.patch("/{car_id}/active", response_model=CarResponse)
+@router.patch("/{car_id}/activate", response_model=CarResponse)
 async def activate_car(
     car_id: int,
     service: CarService = Depends(get_car_service)

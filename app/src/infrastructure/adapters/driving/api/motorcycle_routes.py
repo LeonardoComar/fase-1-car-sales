@@ -223,49 +223,49 @@ async def delete_motorcycle(
         )
 
 
-@router.patch("/{motorcycle_id}/inactive", response_model=MotorcycleResponse)
-async def inactivate_motorcycle(
+@router.patch("/{motorcycle_id}/deactivate", response_model=MotorcycleResponse)
+async def deactivate_motorcycle(
     motorcycle_id: int,
     service: MotorcycleService = Depends(get_motorcycle_service)
 ) -> MotorcycleResponse:
     """
-    Inativa uma moto alterando seu status para 'Inativo'.
+    Desativa uma moto alterando seu status para 'Inativo'.
     
     Args:
         motorcycle_id: ID da moto
         service: Serviço de motos (injetado)
         
     Returns:
-        MotorcycleResponse: Dados da moto inativada
+        MotorcycleResponse: Dados da moto desativada
         
     Raises:
         HTTPException: 404 se não encontrada, 500 se erro interno
     """
     try:
-        logger.info(f"Recebida requisição para inativar moto ID: {motorcycle_id}")
+        logger.info(f"Recebida requisição para desativar moto ID: {motorcycle_id}")
         
         motorcycle_response = await service.inactivate_motorcycle(motorcycle_id)
         if not motorcycle_response:
-            logger.info(f"Moto não encontrada para inativação via API. ID: {motorcycle_id}")
+            logger.info(f"Moto não encontrada para desativação via API. ID: {motorcycle_id}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Moto não encontrada"
             )
         
-        logger.info(f"Moto inativada com sucesso via API. ID: {motorcycle_id}")
+        logger.info(f"Moto desativada com sucesso via API. ID: {motorcycle_id}")
         return motorcycle_response
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Erro interno ao inativar moto via API. ID {motorcycle_id}: {str(e)}")
+        logger.error(f"Erro interno ao desativar moto via API. ID {motorcycle_id}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro interno do servidor"
         )
 
 
-@router.patch("/{motorcycle_id}/active", response_model=MotorcycleResponse)
+@router.patch("/{motorcycle_id}/activate", response_model=MotorcycleResponse)
 async def activate_motorcycle(
     motorcycle_id: int,
     service: MotorcycleService = Depends(get_motorcycle_service)

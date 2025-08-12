@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from app.src.infrastructure.adapters.driving.api.car_routes import router as car_router
 from app.src.infrastructure.adapters.driving.api.motorcycle_routes import router as motorcycle_router
 from app.src.infrastructure.adapters.driving.api.client_routes import router as client_router
+from app.src.infrastructure.adapters.driving.api.employee_routes import router as employee_router
 
 router = APIRouter()
 
@@ -13,6 +14,9 @@ router.include_router(motorcycle_router)
 
 # Incluir as rotas de clientes
 router.include_router(client_router)
+
+# Incluir as rotas de funcionários
+router.include_router(employee_router)
 
 # Rota de Health Check
 @router.get("/health_check")
