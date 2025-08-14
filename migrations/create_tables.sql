@@ -129,17 +129,17 @@ CREATE TABLE messages (
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
-
-
-
 CREATE TABLE vehicle_images (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   vehicle_id BIGINT NOT NULL,
   filename VARCHAR(255) NOT NULL,
   path VARCHAR(500) NOT NULL,
-  thumbnail_path VARCHAR(500),
-  position SMALLINT UNSIGNED,
+  thumbnail_path VARCHAR(500) NULL,
+  position SMALLINT UNSIGNED NOT NULL CHECK (position >= 1 AND position <= 10),
+  is_primary BOOLEAN DEFAULT FALSE,
   uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (vehicle_id) REFERENCES motor_vehicles(id) ON DELETE CASCADE
+  FOREIGN KEY (vehicle_id) REFERENCES motor_vehicles(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_vehicle_position (vehicle_id, position),
+  INDEX idx_vehicle_id (vehicle_id),
+  INDEX idx_is_primary (is_primary)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

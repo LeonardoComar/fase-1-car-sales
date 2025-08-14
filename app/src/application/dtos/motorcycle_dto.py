@@ -2,6 +2,17 @@ from pydantic import BaseModel, Field, validator
 from typing import Optional, List
 from decimal import Decimal
 
+# Import compartilhado
+class VehicleImageInfo(BaseModel):
+    """
+    DTO para informações básicas de imagem do veículo
+    """
+    id: int
+    url: str
+    thumbnail_url: Optional[str]
+    position: int
+    is_primary: bool
+
 
 class CreateMotorcycleRequest(BaseModel):
     """
@@ -74,6 +85,7 @@ class MotorcycleResponse(BaseModel):
     front_rear_brake: str
     created_at: str
     updated_at: str
+    images: List[VehicleImageInfo] = []
 
     class Config:
         from_attributes = True
@@ -98,7 +110,16 @@ class MotorcycleResponse(BaseModel):
                 "gears": 6,
                 "front_rear_brake": "Disco/Disco",
                 "created_at": "2025-08-10T10:30:00",
-                "updated_at": "2025-08-10T10:30:00"
+                "updated_at": "2025-08-10T10:30:00",
+                "images": [
+                    {
+                        "id": 1,
+                        "url": "/static/uploads/motorcycles/1/image1.jpg",
+                        "thumbnail_url": "/static/uploads/thumbnails/motorcycles/1/thumb_image1.jpg",
+                        "position": 1,
+                        "is_primary": True
+                    }
+                ]
             }
         }
 

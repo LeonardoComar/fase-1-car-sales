@@ -2,7 +2,8 @@ from typing import Optional, List
 from app.src.domain.ports.car_repository import CarRepositoryInterface
 from app.src.domain.entities.car_model import Car
 from app.src.domain.entities.motor_vehicle_model import MotorVehicle
-from app.src.application.dtos.car_dto import CreateCarRequest, CarResponse, CarsListResponse
+from app.src.application.dtos.car_dto import CreateCarRequest, CarResponse, CarsListResponse, VehicleImageInfo
+from app.src.infrastructure.driven.persistence.vehicle_image_repository_impl import VehicleImageRepositoryImpl
 from decimal import Decimal
 import logging
 
@@ -17,6 +18,7 @@ class CarService:
     
     def __init__(self, car_repository: CarRepositoryInterface):
         self.car_repository = car_repository
+        self.vehicle_image_repository = VehicleImageRepositoryImpl()
     
     async def create_car(self, request: CreateCarRequest) -> CarResponse:
         """
@@ -291,6 +293,20 @@ class CarService:
         """
         motor_vehicle = car.motor_vehicle
         
+        # Buscar imagens do veículo
+        vehicle_images = self.vehicle_image_repository.find_by_vehicle_id(motor_vehicle.id)
+        
+        # Converter imagens para VehicleImageInfo
+        images = []
+        for img in vehicle_images:
+            images.append(VehicleImageInfo(
+                id=img.id,
+                url=f"/static/uploads/cars/{motor_vehicle.id}/{img.filename}",
+                thumbnail_url=f"/static/uploads/thumbnails/cars/{motor_vehicle.id}/thumb_{img.filename}" if img.thumbnail_path else None,
+                position=img.position,
+                is_primary=img.is_primary
+            ))
+        
         return CarResponse(
             id=motor_vehicle.id,
             model=motor_vehicle.model,
@@ -305,5 +321,6 @@ class CarService:
             bodywork=car.bodywork,
             transmission=car.transmission,
             created_at=motor_vehicle.created_at.isoformat() if motor_vehicle.created_at else "",
-            updated_at=motor_vehicle.updated_at.isoformat() if motor_vehicle.updated_at else ""
+            updated_at=motor_vehicle.updated_at.isoformat() if motor_vehicle.updated_at else "",
+            images=images
         )

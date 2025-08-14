@@ -5,6 +5,7 @@ from app.src.infrastructure.adapters.driving.api.client_routes import router as 
 from app.src.infrastructure.adapters.driving.api.employee_routes import router as employee_router
 from app.src.infrastructure.adapters.driving.api.sale_routes import router as sale_router
 from app.src.infrastructure.adapters.driving.api.message_routes import router as message_router
+from app.src.infrastructure.adapters.driving.api.vehicle_image_routes import router as vehicle_image_router
 
 router = APIRouter()
 
@@ -25,6 +26,9 @@ router.include_router(sale_router)
 
 # Incluir as rotas de mensagens
 router.include_router(message_router)
+
+# Incluir as rotas de imagens de veículos
+router.include_router(vehicle_image_router)
 
 # Rota de Health Check
 @router.get("/health_check")

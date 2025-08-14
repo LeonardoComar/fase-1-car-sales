@@ -19,6 +19,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar o código da aplicação
 COPY . .
 
+# Criar diretórios necessários para upload de imagens
+RUN mkdir -p static/uploads/cars static/uploads/motorcycles static/uploads/thumbnails/cars static/uploads/thumbnails/motorcycles
+
 # Expor a porta
 EXPOSE 8080
 

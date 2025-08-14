@@ -2,7 +2,8 @@ from typing import Optional, List
 from app.src.domain.ports.motorcycle_repository import MotorcycleRepositoryInterface
 from app.src.domain.entities.motorcycle_model import Motorcycle
 from app.src.domain.entities.motor_vehicle_model import MotorVehicle
-from app.src.application.dtos.motorcycle_dto import CreateMotorcycleRequest, MotorcycleResponse, MotorcyclesListResponse
+from app.src.application.dtos.motorcycle_dto import CreateMotorcycleRequest, MotorcycleResponse, MotorcyclesListResponse, VehicleImageInfo
+from app.src.infrastructure.driven.persistence.vehicle_image_repository_impl import VehicleImageRepositoryImpl
 from decimal import Decimal
 import logging
 
@@ -17,6 +18,7 @@ class MotorcycleService:
     
     def __init__(self, motorcycle_repository: MotorcycleRepositoryInterface):
         self.motorcycle_repository = motorcycle_repository
+        self.vehicle_image_repository = VehicleImageRepositoryImpl()
     
     async def create_motorcycle(self, request: CreateMotorcycleRequest) -> MotorcycleResponse:
         """
@@ -303,6 +305,20 @@ class MotorcycleService:
         """
         motor_vehicle = motorcycle.motor_vehicle
         
+        # Buscar imagens do veículo
+        vehicle_images = self.vehicle_image_repository.find_by_vehicle_id(motor_vehicle.id)
+        
+        # Converter imagens para VehicleImageInfo
+        images = []
+        for img in vehicle_images:
+            images.append(VehicleImageInfo(
+                id=img.id,
+                url=f"/static/uploads/motorcycles/{motor_vehicle.id}/{img.filename}",
+                thumbnail_url=f"/static/uploads/thumbnails/motorcycles/{motor_vehicle.id}/thumb_{img.filename}" if img.thumbnail_path else None,
+                position=img.position,
+                is_primary=img.is_primary
+            ))
+        
         return MotorcycleResponse(
             id=motor_vehicle.id,
             model=motor_vehicle.model,
@@ -323,5 +339,6 @@ class MotorcycleService:
             gears=motorcycle.gears,
             front_rear_brake=motorcycle.front_rear_brake,
             created_at=motor_vehicle.created_at.isoformat() if motor_vehicle.created_at else "",
-            updated_at=motor_vehicle.updated_at.isoformat() if motor_vehicle.updated_at else ""
+            updated_at=motor_vehicle.updated_at.isoformat() if motor_vehicle.updated_at else "",
+            images=images
         )
