@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional
+from decimal import Decimal
 
 
 class CreateCarRequest(BaseModel):
@@ -13,7 +14,7 @@ class CreateCarRequest(BaseModel):
     fuel_type: str = Field(..., min_length=1, max_length=20, description="Tipo de combustível")
     color: str = Field(..., min_length=1, max_length=50, description="Cor do veículo")
     city: str = Field(..., min_length=1, max_length=100, description="Cidade onde está o veículo")
-    price: int = Field(..., gt=0, description="Preço do veículo (deve ser maior que zero)")
+    price: Decimal = Field(..., gt=0, description="Preço do veículo (deve ser maior que zero)")
     additional_description: Optional[str] = Field(None, description="Descrição adicional do veículo")
     
     # Dados específicos do carro
@@ -29,7 +30,7 @@ class CreateCarRequest(BaseModel):
                 "fuel_type": "Flex",
                 "color": "Branco",
                 "city": "São Paulo",
-                "price": 85000,
+                "price": "85000.00",
                 "additional_description": "Carro em excelente estado de conservação",
                 "bodywork": "Sedan",
                 "transmission": "Automático"
@@ -48,7 +49,7 @@ class CarResponse(BaseModel):
     fuel_type: str
     color: str
     city: str
-    price: int
+    price: Decimal
     additional_description: Optional[str]
     status: str
     bodywork: str
@@ -67,7 +68,7 @@ class CarResponse(BaseModel):
                 "fuel_type": "Flex",
                 "color": "Branco",
                 "city": "São Paulo",
-                "price": 85000,
+                "price": "85000.00",
                 "additional_description": "Carro em excelente estado de conservação",
                 "status": "Ativo",
                 "bodywork": "Sedan",

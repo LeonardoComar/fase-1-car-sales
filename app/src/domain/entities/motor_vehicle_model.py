@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Integer, String, Text, TIMESTAMP, func
+from sqlalchemy import Column, Integer, String, Text, TIMESTAMP, func, DECIMAL
 from app.src.infrastructure.driven.database.connection_mysql import Base
 from datetime import datetime
 from typing import Optional
+from decimal import Decimal
 
 
 class MotorVehicle(Base):
@@ -19,13 +20,13 @@ class MotorVehicle(Base):
     color = Column(String(50), nullable=False)
     city = Column(String(100), nullable=False)
     additional_description = Column(Text, nullable=True)
-    price = Column(Integer, nullable=False)
+    price = Column(DECIMAL(12, 2), nullable=False)
     status = Column(String(50), nullable=False, default='Ativo')
     created_at = Column(TIMESTAMP, default=func.current_timestamp())
     updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
 
     def __init__(self, model: str, year: str, mileage: int, fuel_type: str, 
-                 color: str, city: str, price: int, additional_description: Optional[str] = None, 
+                 color: str, city: str, price: Decimal, additional_description: Optional[str] = None, 
                  status: str = 'Ativo', id: Optional[int] = None):
         if id is not None:
             self.id = id
