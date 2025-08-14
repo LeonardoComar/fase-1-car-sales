@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, validator
+from typing import Optional, List
 from decimal import Decimal
 
 
@@ -75,5 +75,42 @@ class CarResponse(BaseModel):
                 "transmission": "Automático",
                 "created_at": "2025-08-07T10:30:00",
                 "updated_at": "2025-08-07T10:30:00"
+            }
+        }
+
+
+class CarsListResponse(BaseModel):
+    """
+    DTO para resposta de lista de carros com metadados.
+    """
+    cars: List[CarResponse]
+    total: int
+    skip: int
+    limit: int
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "cars": [
+                    {
+                        "id": 1,
+                        "model": "Honda Civic",
+                        "year": "2020",
+                        "mileage": 25000,
+                        "fuel_type": "Flex",
+                        "color": "Branco",
+                        "city": "São Paulo",
+                        "price": "85000.00",
+                        "additional_description": "Carro em excelente estado",
+                        "status": "Ativo",
+                        "bodywork": "Sedan",
+                        "transmission": "Automático",
+                        "created_at": "2025-08-07T10:30:00",
+                        "updated_at": "2025-08-07T10:30:00"
+                    }
+                ],
+                "total": 1,
+                "skip": 0,
+                "limit": 100
             }
         }

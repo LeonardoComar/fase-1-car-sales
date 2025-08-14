@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional, List
 from app.src.domain.entities.car_model import Car
 from app.src.domain.entities.motor_vehicle_model import MotorVehicle
+from decimal import Decimal
 
 
 class CarRepositoryInterface(ABC):
@@ -69,11 +70,21 @@ class CarRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_active_cars_by_price(self) -> List[Car]:
+    async def get_all_cars(self, skip: int = 0, limit: int = 100, order_by_price: Optional[str] = None, 
+                          status: Optional[str] = None, min_price: Optional[Decimal] = None, 
+                          max_price: Optional[Decimal] = None) -> List[Car]:
         """
-        Busca todos os carros com status 'Ativo' ordenados por preço (menor para maior).
+        Busca todos os carros com filtros opcionais.
         
+        Args:
+            skip: Número de registros para pular
+            limit: Número máximo de registros para retornar
+            order_by_price: Ordenação por preço - 'asc' ou 'desc' (opcional)
+            status: Status dos carros para filtrar (opcional)
+            min_price: Preço mínimo para filtrar (opcional)
+            max_price: Preço máximo para filtrar (opcional)
+            
         Returns:
-            List[Car]: Lista de carros ativos ordenados por preço
+            List[Car]: Lista de carros encontrados
         """
         pass

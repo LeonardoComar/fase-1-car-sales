@@ -1,10 +1,12 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import and_, desc, asc
 from typing import Optional, List
 from app.src.domain.ports.motorcycle_repository import MotorcycleRepositoryInterface
 from app.src.domain.entities.motorcycle_model import Motorcycle
 from app.src.domain.entities.motor_vehicle_model import MotorVehicle
 from app.src.infrastructure.driven.database.connection_mysql import get_db_session
+from decimal import Decimal
 import logging
 
 logger = logging.getLogger(__name__)
@@ -168,19 +170,68 @@ class MotorcycleRepository(MotorcycleRepositoryInterface):
             logger.error(f"Erro inesperado ao deletar moto ID {motorcycle_id}: {str(e)}")
             raise Exception(f"Erro inesperado ao deletar moto: {str(e)}")
 
-    async def get_active_motorcycles_by_price(self) -> List[Motorcycle]:
+    def _apply_price_ordering(self, query, order_by_price: Optional[str]):
         """
-        Busca todas as motos com status 'Ativo' ordenadas por preço (menor para maior).
+        Aplica ordenação por preço na query.
+        
+        Args:
+            query: Query do SQLAlchemy
+            order_by_price: 'asc' para crescente, 'desc' para decrescente
+            
+        Returns:
+            Query com ordenação aplicada
+        """
+        if order_by_price == 'desc':
+            return query.order_by(desc(MotorVehicle.price))
+        elif order_by_price == 'asc':
+            return query.order_by(asc(MotorVehicle.price))
+        return query
+
+    async def get_all_motorcycles(self, skip: int = 0, limit: int = 100, order_by_price: Optional[str] = None, 
+                                 status: Optional[str] = None, min_price: Optional[Decimal] = None, 
+                                 max_price: Optional[Decimal] = None) -> List[Motorcycle]:
+        """
+        Busca todas as motocicletas com filtros opcionais.
+        
+        Args:
+            skip: Número de registros para pular
+            limit: Número máximo de registros para retornar
+            order_by_price: Ordenação por preço - 'asc' ou 'desc' (opcional)
+            status: Status das motocicletas para filtrar (opcional)
+            min_price: Preço mínimo para filtrar (opcional)
+            max_price: Preço máximo para filtrar (opcional)
+            
+        Returns:
+            List[Motorcycle]: Lista de motocicletas encontradas
         """
         try:
+            logger.info(f"Buscando motocicletas com filtros. Skip: {skip}, Limit: {limit}, Order: {order_by_price}, Status: {status}, Min Price: {min_price}, Max Price: {max_price}")
+            
             with get_db_session() as session:
-                # Query que junta as tabelas motor_vehicle e motorcycle
-                # Filtra por status 'Ativo' e ordena por preço
-                query = session.query(Motorcycle).join(MotorVehicle).filter(
-                    MotorVehicle.status == 'Ativo'
-                ).order_by(MotorVehicle.price.asc())
+                # Query base juntando as tabelas
+                query = session.query(Motorcycle).join(MotorVehicle)
                 
-                motorcycles = query.all()
+                # Aplicar filtros condicionalmente
+                filters = []
+                
+                if status:
+                    filters.append(MotorVehicle.status == status)
+                
+                if min_price is not None:
+                    filters.append(MotorVehicle.price >= min_price)
+                
+                if max_price is not None:
+                    filters.append(MotorVehicle.price <= max_price)
+                
+                # Aplicar todos os filtros se houver algum
+                if filters:
+                    query = query.filter(and_(*filters))
+                
+                # Aplicar ordenação por preço se especificada
+                query = self._apply_price_ordering(query, order_by_price)
+                
+                # Aplicar paginação
+                motorcycles = query.offset(skip).limit(limit).all()
                 
                 # Carregar eager load dos relacionamentos para evitar lazy loading
                 for motorcycle in motorcycles:
@@ -191,12 +242,12 @@ class MotorcycleRepository(MotorcycleRepositoryInterface):
                     session.expunge(motorcycle.motor_vehicle)
                     session.expunge(motorcycle)
                 
-                logger.info(f"Encontradas {len(motorcycles)} motos ativas ordenadas por preço")
+                logger.info(f"Encontradas {len(motorcycles)} motocicletas com os filtros aplicados")
                 return motorcycles
                 
         except SQLAlchemyError as e:
-            logger.error(f"Erro ao buscar motos ativas por preço: {str(e)}")
-            raise Exception(f"Erro ao buscar motos ativas: {str(e)}")
+            logger.error(f"Erro ao buscar motocicletas com filtros: {str(e)}")
+            raise Exception(f"Erro ao buscar motocicletas: {str(e)}")
         except Exception as e:
-            logger.error(f"Erro inesperado ao buscar motos ativas por preço: {str(e)}")
-            raise Exception(f"Erro inesperado ao buscar motos ativas: {str(e)}")
+            logger.error(f"Erro inesperado ao buscar motocicletas com filtros: {str(e)}")
+            raise Exception(f"Erro inesperado ao buscar motocicletas: {str(e)}")

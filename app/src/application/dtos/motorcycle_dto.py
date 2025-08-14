@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, validator
+from typing import Optional, List
 from decimal import Decimal
 
 
@@ -99,5 +99,48 @@ class MotorcycleResponse(BaseModel):
                 "front_rear_brake": "Disco/Disco",
                 "created_at": "2025-08-10T10:30:00",
                 "updated_at": "2025-08-10T10:30:00"
+            }
+        }
+
+
+class MotorcyclesListResponse(BaseModel):
+    """
+    DTO para resposta de lista de motocicletas com metadados.
+    """
+    motorcycles: List[MotorcycleResponse]
+    total: int
+    skip: int
+    limit: int
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "motorcycles": [
+                    {
+                        "id": 1,
+                        "model": "Honda CB 600F Hornet",
+                        "year": "2021",
+                        "mileage": 15000,
+                        "fuel_type": "Gasolina",
+                        "color": "Azul",
+                        "city": "São Paulo",
+                        "price": "32000.00",
+                        "additional_description": "Moto em excelente estado",
+                        "status": "Ativo",
+                        "starter": "Elétrico",
+                        "fuel_system": "Injeção eletrônica",
+                        "engine_displacement": 600,
+                        "cooling": "Líquido",
+                        "style": "Naked",
+                        "engine_type": "4 cilindros",
+                        "gears": 6,
+                        "front_rear_brake": "Disco/Disco",
+                        "created_at": "2025-08-10T10:30:00",
+                        "updated_at": "2025-08-10T10:30:00"
+                    }
+                ],
+                "total": 1,
+                "skip": 0,
+                "limit": 100
             }
         }

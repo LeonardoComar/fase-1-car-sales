@@ -1,10 +1,12 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import and_, desc, asc
 from typing import Optional, List
 from app.src.domain.ports.car_repository import CarRepositoryInterface
 from app.src.domain.entities.car_model import Car
 from app.src.domain.entities.motor_vehicle_model import MotorVehicle
 from app.src.infrastructure.driven.database.connection_mysql import get_db_session
+from decimal import Decimal
 import logging
 
 logger = logging.getLogger(__name__)
@@ -162,19 +164,68 @@ class CarRepository(CarRepositoryInterface):
             logger.error(f"Erro inesperado ao deletar carro ID {car_id}: {str(e)}")
             raise Exception(f"Erro inesperado ao deletar carro: {str(e)}")
 
-    async def get_active_cars_by_price(self) -> List[Car]:
+    def _apply_price_ordering(self, query, order_by_price: Optional[str]):
         """
-        Busca todos os carros com status 'Ativo' ordenados por preço (menor para maior).
+        Aplica ordenação por preço na query.
+        
+        Args:
+            query: Query do SQLAlchemy
+            order_by_price: 'asc' para crescente, 'desc' para decrescente
+            
+        Returns:
+            Query com ordenação aplicada
+        """
+        if order_by_price == 'desc':
+            return query.order_by(desc(MotorVehicle.price))
+        elif order_by_price == 'asc':
+            return query.order_by(asc(MotorVehicle.price))
+        return query
+
+    async def get_all_cars(self, skip: int = 0, limit: int = 100, order_by_price: Optional[str] = None, 
+                          status: Optional[str] = None, min_price: Optional[Decimal] = None, 
+                          max_price: Optional[Decimal] = None) -> List[Car]:
+        """
+        Busca todos os carros com filtros opcionais.
+        
+        Args:
+            skip: Número de registros para pular
+            limit: Número máximo de registros para retornar
+            order_by_price: Ordenação por preço - 'asc' ou 'desc' (opcional)
+            status: Status dos carros para filtrar (opcional)
+            min_price: Preço mínimo para filtrar (opcional)
+            max_price: Preço máximo para filtrar (opcional)
+            
+        Returns:
+            List[Car]: Lista de carros encontrados
         """
         try:
+            logger.info(f"Buscando carros com filtros. Skip: {skip}, Limit: {limit}, Order: {order_by_price}, Status: {status}, Min Price: {min_price}, Max Price: {max_price}")
+            
             with get_db_session() as session:
-                # Query que junta as tabelas motor_vehicle e car
-                # Filtra por status 'Ativo' e ordena por preço
-                query = session.query(Car).join(MotorVehicle).filter(
-                    MotorVehicle.status == 'Ativo'
-                ).order_by(MotorVehicle.price.asc())
+                # Query base juntando as tabelas
+                query = session.query(Car).join(MotorVehicle)
                 
-                cars = query.all()
+                # Aplicar filtros condicionalmente
+                filters = []
+                
+                if status:
+                    filters.append(MotorVehicle.status == status)
+                
+                if min_price is not None:
+                    filters.append(MotorVehicle.price >= min_price)
+                
+                if max_price is not None:
+                    filters.append(MotorVehicle.price <= max_price)
+                
+                # Aplicar todos os filtros se houver algum
+                if filters:
+                    query = query.filter(and_(*filters))
+                
+                # Aplicar ordenação por preço se especificada
+                query = self._apply_price_ordering(query, order_by_price)
+                
+                # Aplicar paginação
+                cars = query.offset(skip).limit(limit).all()
                 
                 # Carregar eager load dos relacionamentos para evitar lazy loading
                 for car in cars:
@@ -185,12 +236,12 @@ class CarRepository(CarRepositoryInterface):
                     session.expunge(car.motor_vehicle)
                     session.expunge(car)
                 
-                logger.info(f"Encontrados {len(cars)} carros ativos ordenados por preço")
+                logger.info(f"Encontrados {len(cars)} carros com os filtros aplicados")
                 return cars
                 
         except SQLAlchemyError as e:
-            logger.error(f"Erro ao buscar carros ativos por preço: {str(e)}")
-            raise Exception(f"Erro ao buscar carros ativos: {str(e)}")
+            logger.error(f"Erro ao buscar carros com filtros: {str(e)}")
+            raise Exception(f"Erro ao buscar carros: {str(e)}")
         except Exception as e:
-            logger.error(f"Erro inesperado ao buscar carros ativos por preço: {str(e)}")
-            raise Exception(f"Erro inesperado ao buscar carros ativos: {str(e)}")
+            logger.error(f"Erro inesperado ao buscar carros com filtros: {str(e)}")
+            raise Exception(f"Erro inesperado ao buscar carros: {str(e)}")

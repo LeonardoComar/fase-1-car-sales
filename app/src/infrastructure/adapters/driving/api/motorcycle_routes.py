@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException, status, Depends
-from typing import List
+from fastapi import APIRouter, HTTPException, status, Depends, Query
+from typing import List, Optional
 from app.src.application.services.motorcycle_service import MotorcycleService
-from app.src.application.dtos.motorcycle_dto import CreateMotorcycleRequest, MotorcycleResponse
+from app.src.application.dtos.motorcycle_dto import CreateMotorcycleRequest, MotorcycleResponse, MotorcyclesListResponse
 from app.src.infrastructure.driven.persistence.motorcycle_repository_impl import MotorcycleRepository
+from decimal import Decimal
 import logging
 
 logger = logging.getLogger(__name__)
@@ -61,32 +62,66 @@ async def create_motorcycle(
         )
 
 
-@router.get("/list-motorcycles-ordered-by-price", response_model=List[MotorcycleResponse])
-async def get_active_motorcycles_ordered_by_price(
+@router.get("/", response_model=MotorcyclesListResponse)
+async def get_motorcycles(
+    skip: int = Query(0, ge=0, description="Número de registros para pular"),
+    limit: int = Query(100, ge=1, le=1000, description="Número máximo de registros para retornar"),
+    order_by_price: Optional[str] = Query(None, regex="^(asc|desc)$", description="Ordenação por preço: 'asc' ou 'desc'"),
+    status: Optional[str] = Query(None, description="Status das motocicletas para filtrar"),
+    min_price: Optional[Decimal] = Query(None, ge=0, description="Preço mínimo para filtrar"),
+    max_price: Optional[Decimal] = Query(None, ge=0, description="Preço máximo para filtrar"),
     service: MotorcycleService = Depends(get_motorcycle_service)
-) -> List[MotorcycleResponse]:
+) -> MotorcyclesListResponse:
     """
-    Lista todas as motos com status 'Ativo' ordenadas por preço (menor para maior).
+    Lista motocicletas com filtros opcionais.
     
     Args:
-        service: Serviço de motos (injetado)
+        skip: Número de registros para pular (paginação)
+        limit: Número máximo de registros para retornar
+        order_by_price: Ordenação por preço - 'asc' crescente ou 'desc' decrescente
+        status: Status das motocicletas para filtrar (ex: 'Ativo', 'Inativo')
+        min_price: Preço mínimo para filtrar
+        max_price: Preço máximo para filtrar
+        service: Serviço de motocicletas (injetado)
         
     Returns:
-        List[MotorcycleResponse]: Lista de motos ativas ordenadas por preço
+        MotorcyclesListResponse: Lista de motocicletas com metadados
         
     Raises:
-        HTTPException: 500 se erro interno
+        HTTPException: 400 se parâmetros inválidos, 500 se erro interno
     """
     try:
-        logger.info("Recebida requisição para listar motos ativas ordenadas por preço")
+        logger.info(f"Recebida requisição para listar motocicletas. Filtros: order_by_price={order_by_price}, status={status}, min_price={min_price}, max_price={max_price}")
         
-        motorcycles = await service.get_active_motorcycles_by_price()
+        # Validação do range de preços
+        if min_price is not None and max_price is not None and min_price > max_price:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Preço mínimo não pode ser maior que o preço máximo"
+            )
         
-        logger.info(f"Encontradas {len(motorcycles)} motos ativas ordenadas por preço")
-        return motorcycles
+        motorcycles_response = await service.get_motorcycles_with_filters(
+            skip=skip,
+            limit=limit,
+            order_by_price=order_by_price,
+            status=status,
+            min_price=min_price,
+            max_price=max_price
+        )
         
+        logger.info(f"Encontradas {motorcycles_response.total} motocicletas com os filtros aplicados")
+        return motorcycles_response
+        
+    except HTTPException:
+        raise
+    except ValueError as e:
+        logger.error(f"Erro de validação ao listar motocicletas: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
     except Exception as e:
-        logger.error(f"Erro interno ao listar motos ativas ordenadas por preço via API: {str(e)}")
+        logger.error(f"Erro interno ao listar motocicletas via API: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro interno do servidor"

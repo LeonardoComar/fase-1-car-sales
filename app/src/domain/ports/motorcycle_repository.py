@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional, List
 from app.src.domain.entities.motorcycle_model import Motorcycle
 from app.src.domain.entities.motor_vehicle_model import MotorVehicle
+from decimal import Decimal
 
 
 class MotorcycleRepositoryInterface(ABC):
@@ -69,11 +70,21 @@ class MotorcycleRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_active_motorcycles_by_price(self) -> List[Motorcycle]:
+    async def get_all_motorcycles(self, skip: int = 0, limit: int = 100, order_by_price: Optional[str] = None, 
+                                 status: Optional[str] = None, min_price: Optional[Decimal] = None, 
+                                 max_price: Optional[Decimal] = None) -> List[Motorcycle]:
         """
-        Busca todas as motos com status 'Ativo' ordenadas por preço (menor para maior).
+        Busca todas as motocicletas com filtros opcionais.
         
+        Args:
+            skip: Número de registros para pular
+            limit: Número máximo de registros para retornar
+            order_by_price: Ordenação por preço - 'asc' ou 'desc' (opcional)
+            status: Status das motocicletas para filtrar (opcional)
+            min_price: Preço mínimo para filtrar (opcional)
+            max_price: Preço máximo para filtrar (opcional)
+            
         Returns:
-            List[Motorcycle]: Lista de motos ativas ordenadas por preço
+            List[Motorcycle]: Lista de motocicletas encontradas
         """
         pass

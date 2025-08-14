@@ -2,7 +2,8 @@ from typing import Optional, List
 from app.src.domain.ports.motorcycle_repository import MotorcycleRepositoryInterface
 from app.src.domain.entities.motorcycle_model import Motorcycle
 from app.src.domain.entities.motor_vehicle_model import MotorVehicle
-from app.src.application.dtos.motorcycle_dto import CreateMotorcycleRequest, MotorcycleResponse
+from app.src.application.dtos.motorcycle_dto import CreateMotorcycleRequest, MotorcycleResponse, MotorcyclesListResponse
+from decimal import Decimal
 import logging
 
 logger = logging.getLogger(__name__)
@@ -244,27 +245,51 @@ class MotorcycleService:
             logger.error(f"Erro ao ativar moto ID {motorcycle_id}: {str(e)}")
             raise Exception(f"Erro ao ativar moto: {str(e)}")
     
-    async def get_active_motorcycles_by_price(self) -> List[MotorcycleResponse]:
+    async def get_motorcycles_with_filters(self, skip: int = 0, limit: int = 100, order_by_price: Optional[str] = None, 
+                                          status: Optional[str] = None, min_price: Optional[Decimal] = None, 
+                                          max_price: Optional[Decimal] = None) -> MotorcyclesListResponse:
         """
-        Busca todas as motos com status 'Ativo' ordenadas por preço (menor para maior).
+        Busca motocicletas com filtros opcionais.
         
+        Args:
+            skip: Número de registros para pular
+            limit: Número máximo de registros para retornar
+            order_by_price: Ordenação por preço - 'asc' ou 'desc' (opcional)
+            status: Status das motocicletas para filtrar (opcional)
+            min_price: Preço mínimo para filtrar (opcional)
+            max_price: Preço máximo para filtrar (opcional)
+            
         Returns:
-            List[MotorcycleResponse]: Lista de motos ativas ordenadas por preço
+            MotorcyclesListResponse: Lista de motocicletas com metadados
         """
         try:
-            logger.info("Buscando motos ativas ordenadas por preço")
+            logger.info(f"Buscando motocicletas com filtros. Order: {order_by_price}, Status: {status}, Range: {min_price}-{max_price}")
             
-            motorcycles = await self.motorcycle_repository.get_active_motorcycles_by_price()
+            motorcycles = await self.motorcycle_repository.get_all_motorcycles(
+                skip=skip, 
+                limit=limit, 
+                order_by_price=order_by_price,
+                status=status,
+                min_price=min_price,
+                max_price=max_price
+            )
             
             # Converter para DTOs de resposta
-            responses = [self._motorcycle_to_response(motorcycle) for motorcycle in motorcycles]
+            motorcycle_responses = [self._motorcycle_to_response(motorcycle) for motorcycle in motorcycles]
             
-            logger.info(f"Encontradas {len(responses)} motos ativas")
-            return responses
+            response = MotorcyclesListResponse(
+                motorcycles=motorcycle_responses,
+                total=len(motorcycle_responses),
+                skip=skip,
+                limit=limit
+            )
+            
+            logger.info(f"Encontradas {len(motorcycle_responses)} motocicletas com filtros")
+            return response
             
         except Exception as e:
-            logger.error(f"Erro ao buscar motos ativas por preço: {str(e)}")
-            raise Exception(f"Erro ao buscar motos ativas: {str(e)}")
+            logger.error(f"Erro ao buscar motocicletas com filtros: {str(e)}")
+            raise Exception(f"Erro ao buscar motocicletas: {str(e)}")
     
     def _motorcycle_to_response(self, motorcycle: Motorcycle) -> MotorcycleResponse:
         """

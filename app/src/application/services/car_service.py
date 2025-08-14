@@ -2,7 +2,8 @@ from typing import Optional, List
 from app.src.domain.ports.car_repository import CarRepositoryInterface
 from app.src.domain.entities.car_model import Car
 from app.src.domain.entities.motor_vehicle_model import MotorVehicle
-from app.src.application.dtos.car_dto import CreateCarRequest, CarResponse
+from app.src.application.dtos.car_dto import CreateCarRequest, CarResponse, CarsListResponse
+from decimal import Decimal
 import logging
 
 logger = logging.getLogger(__name__)
@@ -232,27 +233,51 @@ class CarService:
             logger.error(f"Erro ao ativar carro ID {car_id}: {str(e)}")
             raise Exception(f"Erro ao ativar carro: {str(e)}")
     
-    async def get_active_cars_by_price(self) -> List[CarResponse]:
+    async def get_cars_with_filters(self, skip: int = 0, limit: int = 100, order_by_price: Optional[str] = None, 
+                                   status: Optional[str] = None, min_price: Optional[Decimal] = None, 
+                                   max_price: Optional[Decimal] = None) -> CarsListResponse:
         """
-        Busca todos os carros com status 'Ativo' ordenados por preço (menor para maior).
+        Busca carros com filtros opcionais.
         
+        Args:
+            skip: Número de registros para pular
+            limit: Número máximo de registros para retornar
+            order_by_price: Ordenação por preço - 'asc' ou 'desc' (opcional)
+            status: Status dos carros para filtrar (opcional)
+            min_price: Preço mínimo para filtrar (opcional)
+            max_price: Preço máximo para filtrar (opcional)
+            
         Returns:
-            List[CarResponse]: Lista de carros ativos ordenados por preço
+            CarsListResponse: Lista de carros com metadados
         """
         try:
-            logger.info("Buscando carros ativos ordenados por preço")
+            logger.info(f"Buscando carros com filtros. Order: {order_by_price}, Status: {status}, Range: {min_price}-{max_price}")
             
-            cars = await self.car_repository.get_active_cars_by_price()
+            cars = await self.car_repository.get_all_cars(
+                skip=skip, 
+                limit=limit, 
+                order_by_price=order_by_price,
+                status=status,
+                min_price=min_price,
+                max_price=max_price
+            )
             
             # Converter para DTOs de resposta
-            responses = [self._car_to_response(car) for car in cars]
+            car_responses = [self._car_to_response(car) for car in cars]
             
-            logger.info(f"Encontrados {len(responses)} carros ativos")
-            return responses
+            response = CarsListResponse(
+                cars=car_responses,
+                total=len(car_responses),
+                skip=skip,
+                limit=limit
+            )
+            
+            logger.info(f"Encontrados {len(car_responses)} carros com filtros")
+            return response
             
         except Exception as e:
-            logger.error(f"Erro ao buscar carros ativos por preço: {str(e)}")
-            raise Exception(f"Erro ao buscar carros ativos: {str(e)}")
+            logger.error(f"Erro ao buscar carros com filtros: {str(e)}")
+            raise Exception(f"Erro ao buscar carros: {str(e)}")
     
     def _car_to_response(self, car: Car) -> CarResponse:
         """

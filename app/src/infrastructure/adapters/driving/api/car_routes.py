@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException, status, Depends
-from typing import List
+from fastapi import APIRouter, HTTPException, status, Depends, Query
+from typing import List, Optional
 from app.src.application.services.car_service import CarService
-from app.src.application.dtos.car_dto import CreateCarRequest, CarResponse
+from app.src.application.dtos.car_dto import CreateCarRequest, CarResponse, CarsListResponse
 from app.src.infrastructure.driven.persistence.car_repository_impl import CarRepository
+from decimal import Decimal
 import logging
 
 logger = logging.getLogger(__name__)
@@ -61,32 +62,66 @@ async def create_car(
         )
 
 
-@router.get("/list-cars-ordered-by-price", response_model=List[CarResponse])
-async def get_active_cars_ordered_by_price(
+@router.get("/", response_model=CarsListResponse)
+async def get_cars(
+    skip: int = Query(0, ge=0, description="Número de registros para pular"),
+    limit: int = Query(100, ge=1, le=1000, description="Número máximo de registros para retornar"),
+    order_by_price: Optional[str] = Query(None, regex="^(asc|desc)$", description="Ordenação por preço: 'asc' ou 'desc'"),
+    status: Optional[str] = Query(None, description="Status dos carros para filtrar"),
+    min_price: Optional[Decimal] = Query(None, ge=0, description="Preço mínimo para filtrar"),
+    max_price: Optional[Decimal] = Query(None, ge=0, description="Preço máximo para filtrar"),
     service: CarService = Depends(get_car_service)
-) -> List[CarResponse]:
+) -> CarsListResponse:
     """
-    Lista todos os carros com status 'Ativo' ordenados por preço (menor para maior).
+    Lista carros com filtros opcionais.
     
     Args:
+        skip: Número de registros para pular (paginação)
+        limit: Número máximo de registros para retornar
+        order_by_price: Ordenação por preço - 'asc' crescente ou 'desc' decrescente
+        status: Status dos carros para filtrar (ex: 'Ativo', 'Inativo')
+        min_price: Preço mínimo para filtrar
+        max_price: Preço máximo para filtrar
         service: Serviço de carros (injetado)
         
     Returns:
-        List[CarResponse]: Lista de carros ativos ordenados por preço
+        CarsListResponse: Lista de carros com metadados
         
     Raises:
-        HTTPException: 500 se erro interno
+        HTTPException: 400 se parâmetros inválidos, 500 se erro interno
     """
     try:
-        logger.info("Recebida requisição para listar carros ativos ordenados por preço")
+        logger.info(f"Recebida requisição para listar carros. Filtros: order_by_price={order_by_price}, status={status}, min_price={min_price}, max_price={max_price}")
         
-        cars = await service.get_active_cars_by_price()
+        # Validação do range de preços
+        if min_price is not None and max_price is not None and min_price > max_price:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Preço mínimo não pode ser maior que o preço máximo"
+            )
         
-        logger.info(f"Encontrados {len(cars)} carros ativos ordenados por preço")
-        return cars
+        cars_response = await service.get_cars_with_filters(
+            skip=skip,
+            limit=limit,
+            order_by_price=order_by_price,
+            status=status,
+            min_price=min_price,
+            max_price=max_price
+        )
         
+        logger.info(f"Encontrados {cars_response.total} carros com os filtros aplicados")
+        return cars_response
+        
+    except HTTPException:
+        raise
+    except ValueError as e:
+        logger.error(f"Erro de validação ao listar carros: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
     except Exception as e:
-        logger.error(f"Erro interno ao listar carros ativos ordenados por preço via API: {str(e)}")
+        logger.error(f"Erro interno ao listar carros via API: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro interno do servidor"
