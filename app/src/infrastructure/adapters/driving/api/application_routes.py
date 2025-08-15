@@ -6,8 +6,13 @@ from app.src.infrastructure.adapters.driving.api.employee_routes import router a
 from app.src.infrastructure.adapters.driving.api.sale_routes import router as sale_router
 from app.src.infrastructure.adapters.driving.api.message_routes import router as message_router
 from app.src.infrastructure.adapters.driving.api.vehicle_image_routes import router as vehicle_image_router
+from app.src.infrastructure.adapters.driving.api.auth_routes import auth_router, users_router
 
 router = APIRouter()
+
+# Incluir as rotas de autenticação
+router.include_router(auth_router)
+router.include_router(users_router)
 
 # Incluir as rotas de carros
 router.include_router(car_router)
@@ -28,6 +33,7 @@ router.include_router(sale_router)
 router.include_router(message_router)
 
 # Incluir as rotas de imagens de veículos
+router.include_router(vehicle_image_router)
 router.include_router(vehicle_image_router)
 
 # Rota de Health Check

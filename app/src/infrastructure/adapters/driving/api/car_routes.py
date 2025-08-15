@@ -2,7 +2,11 @@ from fastapi import APIRouter, HTTPException, status, Depends, Query
 from typing import List, Optional
 from app.src.application.services.car_service import CarService
 from app.src.application.dtos.car_dto import CreateCarRequest, CarResponse, CarsListResponse
+from app.src.application.dtos.user_dto import UserResponseDto
 from app.src.infrastructure.driven.persistence.car_repository_impl import CarRepository
+from app.src.infrastructure.adapters.driving.api.auth_dependencies import (
+    get_current_admin_or_vendedor_user
+)
 from decimal import Decimal
 import logging
 
@@ -23,14 +27,18 @@ def get_car_service() -> CarService:
 @router.post("/", response_model=CarResponse, status_code=status.HTTP_201_CREATED)
 async def create_car(
     request: CreateCarRequest,
-    service: CarService = Depends(get_car_service)
+    service: CarService = Depends(get_car_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ) -> CarResponse:
     """
     Cria um novo carro.
     
+    Requer autenticação: Administrador ou Vendedor
+    
     Args:
         request: Dados do carro a ser criado
         service: Serviço de carros (injetado)
+        current_user: Usuário autenticado
         
     Returns:
         CarResponse: Dados do carro criado
@@ -172,15 +180,19 @@ async def get_car(
 async def update_car(
     car_id: int,
     request: CreateCarRequest,
-    service: CarService = Depends(get_car_service)
+    service: CarService = Depends(get_car_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ) -> CarResponse:
     """
     Atualiza um carro existente.
+    
+    Requer autenticação: Administrador ou Vendedor
     
     Args:
         car_id: ID do carro
         request: Novos dados do carro
         service: Serviço de carros (injetado)
+        current_user: Usuário autenticado
         
     Returns:
         CarResponse: Dados do carro atualizado
@@ -221,14 +233,18 @@ async def update_car(
 @router.delete("/{car_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_car(
     car_id: int,
-    service: CarService = Depends(get_car_service)
+    service: CarService = Depends(get_car_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ):
     """
     Remove um carro.
     
+    Requer autenticação: Administrador ou Vendedor
+    
     Args:
         car_id: ID do carro
         service: Serviço de carros (injetado)
+        current_user: Usuário autenticado
         
     Raises:
         HTTPException: 404 se não encontrado, 500 se erro interno
@@ -259,14 +275,18 @@ async def delete_car(
 @router.patch("/{car_id}/deactivate", response_model=CarResponse)
 async def deactivate_car(
     car_id: int,
-    service: CarService = Depends(get_car_service)
+    service: CarService = Depends(get_car_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ) -> CarResponse:
     """
     Desativa um carro alterando seu status para 'Inativo'.
     
+    Requer autenticação: Administrador ou Vendedor
+    
     Args:
         car_id: ID do carro
         service: Serviço de carros (injetado)
+        current_user: Usuário autenticado
         
     Returns:
         CarResponse: Dados do carro desativado
@@ -301,14 +321,18 @@ async def deactivate_car(
 @router.patch("/{car_id}/activate", response_model=CarResponse)
 async def activate_car(
     car_id: int,
-    service: CarService = Depends(get_car_service)
+    service: CarService = Depends(get_car_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ) -> CarResponse:
     """
     Ativa um carro alterando seu status para 'Ativo'.
     
+    Requer autenticação: Administrador ou Vendedor
+    
     Args:
         car_id: ID do carro
         service: Serviço de carros (injetado)
+        current_user: Usuário autenticado
         
     Returns:
         CarResponse: Dados do carro ativado

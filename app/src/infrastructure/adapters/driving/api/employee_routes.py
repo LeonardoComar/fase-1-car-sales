@@ -6,8 +6,12 @@ from app.src.application.dtos.employee_dto import (
     EmployeeResponse, 
     EmployeesListResponse
 )
+from app.src.application.dtos.user_dto import UserResponseDto
 from app.src.application.services.employee_service import EmployeeService
 from app.src.infrastructure.driven.persistence.employee_repository_impl import EmployeeRepository
+from app.src.infrastructure.adapters.driving.api.auth_dependencies import (
+    get_current_admin_user
+)
 import logging
 
 logger = logging.getLogger(__name__)
@@ -24,10 +28,13 @@ def get_employee_service() -> EmployeeService:
 @router.post("/", response_model=EmployeeResponse, status_code=201)
 async def create_employee(
     employee_request: CreateEmployeeRequest,
-    employee_service: EmployeeService = Depends(get_employee_service)
+    employee_service: EmployeeService = Depends(get_employee_service),
+    current_user: UserResponseDto = Depends(get_current_admin_user)
 ):
     """
     Cria um novo funcionário no sistema.
+    
+    Requer autenticação: Administrador
     
     - **name**: Nome completo do funcionário
     - **email**: Email único do funcionário
@@ -57,10 +64,13 @@ async def list_employees(
     name: Optional[str] = Query(None, description="Buscar por nome (busca parcial)"),
     cpf: Optional[str] = Query(None, description="Buscar por CPF exato"),
     status: Optional[str] = Query(None, regex="^(Ativo|Inativo)$", description="Filtrar por status"),
-    employee_service: EmployeeService = Depends(get_employee_service)
+    employee_service: EmployeeService = Depends(get_employee_service),
+    current_user: UserResponseDto = Depends(get_current_admin_user)
 ):
     """
     Lista todos os funcionários com opções de busca e paginação.
+    
+    Requer autenticação: Administrador
     
     ### Parâmetros de busca (mutuamente exclusivos):
     - **name**: Busca funcionários cujo nome contenha o termo especificado
@@ -109,10 +119,13 @@ async def list_employees(
 @router.get("/{employee_id}", response_model=EmployeeResponse)
 async def get_employee(
     employee_id: int,
-    employee_service: EmployeeService = Depends(get_employee_service)
+    employee_service: EmployeeService = Depends(get_employee_service),
+    current_user: UserResponseDto = Depends(get_current_admin_user)
 ):
     """
     Busca um funcionário específico pelo ID.
+    
+    Requer autenticação: Administrador
     
     - **employee_id**: ID único do funcionário
     """
@@ -138,7 +151,8 @@ async def get_employee(
 async def update_employee(
     employee_id: int,
     employee_request: UpdateEmployeeRequest,
-    employee_service: EmployeeService = Depends(get_employee_service)
+    employee_service: EmployeeService = Depends(get_employee_service),
+    current_user: UserResponseDto = Depends(get_current_admin_user)
 ):
     """
     Atualiza os dados de um funcionário existente.
@@ -177,7 +191,8 @@ async def update_employee(
 @router.delete("/{employee_id}", status_code=204)
 async def delete_employee(
     employee_id: int,
-    employee_service: EmployeeService = Depends(get_employee_service)
+    employee_service: EmployeeService = Depends(get_employee_service),
+    current_user: UserResponseDto = Depends(get_current_admin_user)
 ):
     """
     Remove um funcionário do sistema.
@@ -209,10 +224,13 @@ async def delete_employee(
 @router.patch("/{employee_id}/activate", response_model=EmployeeResponse)
 async def activate_employee(
     employee_id: int,
-    employee_service: EmployeeService = Depends(get_employee_service)
+    employee_service: EmployeeService = Depends(get_employee_service),
+    current_user: UserResponseDto = Depends(get_current_admin_user)
 ):
     """
     Ativa um funcionário (define status como 'Ativo').
+    
+    Requer autenticação: Administrador
     
     - **employee_id**: ID único do funcionário
     
@@ -239,10 +257,13 @@ async def activate_employee(
 @router.patch("/{employee_id}/deactivate", response_model=EmployeeResponse)
 async def deactivate_employee(
     employee_id: int,
-    employee_service: EmployeeService = Depends(get_employee_service)
+    employee_service: EmployeeService = Depends(get_employee_service),
+    current_user: UserResponseDto = Depends(get_current_admin_user)
 ):
     """
     Desativa um funcionário (define status como 'Inativo').
+    
+    Requer autenticação: Administrador
     
     - **employee_id**: ID único do funcionário
     

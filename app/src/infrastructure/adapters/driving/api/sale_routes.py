@@ -5,9 +5,13 @@ from app.src.application.dtos.sale_dto import (
     CreateSaleRequest, UpdateSaleRequest, UpdateSaleStatusRequest,
     SaleResponse, SaleListResponse, SalesListResponse
 )
+from app.src.application.dtos.user_dto import UserResponseDto
 from app.src.infrastructure.driven.persistence.sale_repository_impl import SaleRepositoryImpl
 from app.src.infrastructure.driven.persistence.car_repository_impl import CarRepository
 from app.src.infrastructure.driven.persistence.motorcycle_repository_impl import MotorcycleRepository
+from app.src.infrastructure.adapters.driving.api.auth_dependencies import (
+    get_current_admin_or_vendedor_user
+)
 from datetime import date
 import logging
 
@@ -33,14 +37,18 @@ def get_sale_service() -> SaleService:
 @router.post("/", response_model=SaleResponse, status_code=201)
 async def create_sale(
     request: CreateSaleRequest,
-    sale_service: SaleService = Depends(get_sale_service)
+    sale_service: SaleService = Depends(get_sale_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ):
     """
     Cria uma nova venda.
     
+    Requer autenticação: Administrador ou Vendedor
+    
     Args:
         request: Dados da venda a ser criada
         sale_service: Serviço de vendas
+        current_user: Usuário autenticado
         
     Returns:
         SaleResponse: Dados da venda criada
@@ -73,7 +81,8 @@ async def get_sales(
     start_date: Optional[date] = Query(None, description="Data inicial (YYYY-MM-DD)"),
     end_date: Optional[date] = Query(None, description="Data final (YYYY-MM-DD)"),
     order_by_value: Optional[str] = Query(None, description="Ordenar por valor: 'asc' (crescente) ou 'desc' (decrescente)"),
-    sale_service: SaleService = Depends(get_sale_service)
+    sale_service: SaleService = Depends(get_sale_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ):
     """
     Lista vendas com filtros unificados.

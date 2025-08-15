@@ -81,10 +81,26 @@ O **Car Sales API** é um sistema completo para gerenciamento de vendas de veíc
 | 📖 **Documentação Swagger** | http://localhost:8180/docs | Interface interativa da API |
 | 📋 **ReDoc** | http://localhost:8180/redoc | Documentação alternativa |
 
-### 📮 Postman
+### � Autenticação Automática
+
+A aplicação cria automaticamente um usuário administrador na primeira execução:
+
+| Campo | Valor |
+|-------|--------|
+| 📧 **Email** | `admin@carsales.com` |
+| 🔑 **Senha** | `admin123456` |
+| 👑 **Perfil** | Administrador |
+
+### �📮 Postman
 1. Importe as collections da pasta `📁 Postman/`:
    - `Car Sales.postman_collection.json` - Todas as requisições
    - `Car Sales.postman_environment.json` - Variáveis de ambiente
+
+#### 🔧 **Configuração Automática de Token no Postman:**
+- ✅ **Script de Login Automático** - A rota de login captura automaticamente o token JWT
+- ✅ **Variável de Ambiente** - Token é salvo como `{{access_token}}`
+- ✅ **Headers Pré-configurados** - Todas as rotas protegidas já incluem `Authorization: Bearer {{access_token}}`
+- ✅ **Renovação Automática** - Basta fazer login novamente para atualizar o token
 
 ## 📚 Documentação Adicional
 

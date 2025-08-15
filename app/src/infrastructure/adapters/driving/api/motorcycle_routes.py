@@ -2,7 +2,11 @@ from fastapi import APIRouter, HTTPException, status, Depends, Query
 from typing import List, Optional
 from app.src.application.services.motorcycle_service import MotorcycleService
 from app.src.application.dtos.motorcycle_dto import CreateMotorcycleRequest, MotorcycleResponse, MotorcyclesListResponse
+from app.src.application.dtos.user_dto import UserResponseDto
 from app.src.infrastructure.driven.persistence.motorcycle_repository_impl import MotorcycleRepository
+from app.src.infrastructure.adapters.driving.api.auth_dependencies import (
+    get_current_admin_or_vendedor_user
+)
 from decimal import Decimal
 import logging
 
@@ -23,14 +27,18 @@ def get_motorcycle_service() -> MotorcycleService:
 @router.post("/", response_model=MotorcycleResponse, status_code=status.HTTP_201_CREATED)
 async def create_motorcycle(
     request: CreateMotorcycleRequest,
-    service: MotorcycleService = Depends(get_motorcycle_service)
+    service: MotorcycleService = Depends(get_motorcycle_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ) -> MotorcycleResponse:
     """
     Cria uma nova moto.
     
+    Requer autenticação: Administrador ou Vendedor
+    
     Args:
         request: Dados da moto a ser criada
         service: Serviço de motos (injetado)
+        current_user: Usuário autenticado
         
     Returns:
         MotorcycleResponse: Dados da moto criada
@@ -172,15 +180,19 @@ async def get_motorcycle(
 async def update_motorcycle(
     motorcycle_id: int,
     request: CreateMotorcycleRequest,
-    service: MotorcycleService = Depends(get_motorcycle_service)
+    service: MotorcycleService = Depends(get_motorcycle_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ) -> MotorcycleResponse:
     """
     Atualiza uma moto existente.
+    
+    Requer autenticação: Administrador ou Vendedor
     
     Args:
         motorcycle_id: ID da moto
         request: Novos dados da moto
         service: Serviço de motos (injetado)
+        current_user: Usuário autenticado
         
     Returns:
         MotorcycleResponse: Dados da moto atualizada
@@ -221,14 +233,18 @@ async def update_motorcycle(
 @router.delete("/{motorcycle_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_motorcycle(
     motorcycle_id: int,
-    service: MotorcycleService = Depends(get_motorcycle_service)
+    service: MotorcycleService = Depends(get_motorcycle_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ):
     """
     Remove uma moto.
     
+    Requer autenticação: Administrador ou Vendedor
+    
     Args:
         motorcycle_id: ID da moto
         service: Serviço de motos (injetado)
+        current_user: Usuário autenticado
         
     Raises:
         HTTPException: 404 se não encontrada, 500 se erro interno
@@ -259,14 +275,18 @@ async def delete_motorcycle(
 @router.patch("/{motorcycle_id}/deactivate", response_model=MotorcycleResponse)
 async def deactivate_motorcycle(
     motorcycle_id: int,
-    service: MotorcycleService = Depends(get_motorcycle_service)
+    service: MotorcycleService = Depends(get_motorcycle_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ) -> MotorcycleResponse:
     """
     Desativa uma moto alterando seu status para 'Inativo'.
     
+    Requer autenticação: Administrador ou Vendedor
+    
     Args:
         motorcycle_id: ID da moto
         service: Serviço de motos (injetado)
+        current_user: Usuário autenticado
         
     Returns:
         MotorcycleResponse: Dados da moto desativada
@@ -301,13 +321,18 @@ async def deactivate_motorcycle(
 @router.patch("/{motorcycle_id}/activate", response_model=MotorcycleResponse)
 async def activate_motorcycle(
     motorcycle_id: int,
-    service: MotorcycleService = Depends(get_motorcycle_service)
+    service: MotorcycleService = Depends(get_motorcycle_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ) -> MotorcycleResponse:
     """
     Ativa uma moto alterando seu status para 'Ativo'.
     
+    Requer autenticação: Administrador ou Vendedor
+    
     Args:
         motorcycle_id: ID da moto
+        service: Serviço de motos (injetado)
+        current_user: Usuário autenticado
         service: Serviço de motos (injetado)
         
     Returns:

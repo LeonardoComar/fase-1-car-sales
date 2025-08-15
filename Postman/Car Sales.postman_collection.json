@@ -1,29 +1,38 @@
 {
 	"info": {
-		"_postman_id": "018e2655-6e1a-41a9-afcc-0d9460c94099",
+		"_postman_id": "30b3ab57-d4e2-4ce5-97b6-a3893cd99e12",
 		"name": "Car Sales",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "39997933"
 	},
 	"item": [
 		{
-			"name": "Car",
+			"name": "Carro",
 			"item": [
 				{
-					"name": "Listar Carros do mais barato para o mais caro",
+					"name": "Listar Carros por preço",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}:{{port}}/api/cars/list-cars-ordered-by-price",
+							"raw": "{{baseUrl}}:{{port}}/api/cars?order_by_price=asc&status=Ativo",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"port": "{{port}}",
 							"path": [
 								"api",
-								"cars",
-								"list-cars-ordered-by-price"
+								"cars"
+							],
+							"query": [
+								{
+									"key": "order_by_price",
+									"value": "asc"
+								},
+								{
+									"key": "status",
+									"value": "Ativo"
+								}
 							]
 						}
 					},
@@ -33,7 +42,13 @@
 					"name": "Adicionar Carro",
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n  \"model\": \"Honda Civic 3\",\r\n  \"year\": \"2020\",\r\n  \"mileage\": 25000,\r\n  \"fuel_type\": \"Flex\",\r\n  \"color\": \"Branco\",\r\n  \"city\": \"São Paulo\",\r\n  \"additional_description\": \"Carro em excelente estado\",\r\n  \"bodywork\": \"Sedan\",\r\n  \"transmission\": \"Automático\",\r\n  \"price\": 85000\r\n}",
@@ -62,7 +77,13 @@
 					"name": "Atualizar Carro",
 					"request": {
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n  \"model\": \"Honda Civic\",\r\n  \"year\": \"2020\",\r\n  \"mileage\": 30000,\r\n  \"fuel_type\": \"Flex\",\r\n  \"color\": \"Prata\",\r\n  \"city\": \"São Paulo\",\r\n  \"additional_description\": \"Carro em excelente estado\",\r\n  \"bodywork\": \"Sedan\",\r\n  \"transmission\": \"Automático\",\r\n  \"price\": 10000\r\n}",
@@ -91,7 +112,13 @@
 					"name": "Remover Carro",
 					"request": {
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}:{{port}}/api/cars/{{car_id}}",
 							"host": [
@@ -131,9 +158,15 @@
 					"name": "Inativar Carro por ID",
 					"request": {
 						"method": "PATCH",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{baseUrl}}:{{port}}/api/cars/{{car_id}}/inactive",
+							"raw": "{{baseUrl}}:{{port}}/api/cars/{{car_id}}/deactivate",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -142,7 +175,7 @@
 								"api",
 								"cars",
 								"{{car_id}}",
-								"inactive"
+								"deactivate"
 							]
 						}
 					},
@@ -152,9 +185,15 @@
 					"name": "Ativar Carro por ID",
 					"request": {
 						"method": "PATCH",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{baseUrl}}:{{port}}/api/cars/{{car_id}}/active",
+							"raw": "{{baseUrl}}:{{port}}/api/cars/{{car_id}}/activate",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -163,7 +202,7 @@
 								"api",
 								"cars",
 								"{{car_id}}",
-								"active"
+								"activate"
 							]
 						}
 					},
@@ -172,12 +211,1627 @@
 			]
 		},
 		{
-			"name": "Sales",
-			"item": []
+			"name": "Moto",
+			"item": [
+				{
+					"name": "Listar Motos por preço",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/motorcycles?order_by_price=asc&status=Ativo",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"motorcycles"
+							],
+							"query": [
+								{
+									"key": "order_by_price",
+									"value": "asc"
+								},
+								{
+									"key": "status",
+									"value": "Ativo"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Adicionar Moto",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"model\": \"Honda CB 600F Hornet\",\r\n  \"year\": \"2021\",\r\n  \"mileage\": 15000,\r\n  \"fuel_type\": \"Gasolina\",\r\n  \"color\": \"Azul\",\r\n  \"city\": \"São Paulo\",\r\n  \"price\": 32000,\r\n  \"additional_description\": \"Moto em excelente estado de conservação, revisada em concessionária autorizada\",\r\n  \"starter\": \"Elétrico\",\r\n  \"fuel_system\": \"Injeção eletrônica\",\r\n  \"engine_displacement\": 600,\r\n  \"cooling\": \"Líquido\",\r\n  \"style\": \"Naked\",\r\n  \"engine_type\": \"4 cilindros\",\r\n  \"gears\": 6,\r\n  \"front_rear_brake\": \"Disco/Disco\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/motorcycles/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"motorcycles",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Moto",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"model\": \"Honda CB 600F Hornet\",\r\n  \"year\": \"2021\",\r\n  \"mileage\": 30000,\r\n  \"fuel_type\": \"Gasolina\",\r\n  \"color\": \"Azul\",\r\n  \"city\": \"São Paulo\",\r\n  \"price\": 32000,\r\n  \"additional_description\": \"Moto em excelente estado de conservação, revisada em concessionária autorizada\",\r\n  \"starter\": \"Elétrico\",\r\n  \"fuel_system\": \"Injeção eletrônica\",\r\n  \"engine_displacement\": 600,\r\n  \"cooling\": \"Líquido\",\r\n  \"style\": \"Naked\",\r\n  \"engine_type\": \"4 cilindros\",\r\n  \"gears\": 6,\r\n  \"front_rear_brake\": \"Disco/Disco\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/motorcycles/{{motorcycle_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"motorcycles",
+								"{{motorcycle_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remover Moto",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/motorcycles/{{motorcycle_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"motorcycles",
+								"{{motorcycle_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Visualizar Moto por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/motorcycles/{{motorcycle_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"motorcycles",
+								"{{motorcycle_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Inativar Moto por ID",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/motorcycles/{{motorcycle_id}}/deactivate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"motorcycles",
+								"{{motorcycle_id}}",
+								"deactivate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ativar Moto por ID",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/motorcycles/{{motorcycle_id}}/activate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"motorcycles",
+								"{{motorcycle_id}}",
+								"activate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		},
 		{
-			"name": "Motorcycle",
-			"item": []
+			"name": "Cliente",
+			"item": [
+				{
+					"name": "Adicionar Cliente",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"João Silva\",\r\n  \"email\": \"joao.silva@email.com\",\r\n  \"phone\": \"(11) 99999-9999\",\r\n  \"cpf\": \"510.797.250-08\",\r\n  \"street\": \"Rua das Flores, 123\",\r\n  \"city\": \"São Paulo\",\r\n  \"state\": \"SP\",\r\n  \"zip_code\": \"01234-567\",\r\n  \"country\": \"Brasil\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/clients/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"clients",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Cliente",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"João Silva\",\r\n  \"email\": \"joao.silva@email.com\",\r\n  \"phone\": \"(11) 99999-9999\",\r\n  \"cpf\": \"510.797.250-08\",\r\n  \"street\": \"Rua das Flores, 456\",\r\n  \"city\": \"São Paulo\",\r\n  \"state\": \"SP\",\r\n  \"zip_code\": \"01234-567\",\r\n  \"country\": \"Brasil\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/clients/{{client_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"clients",
+								"{{client_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remover Cliente",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/clients/{{client_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"clients",
+								"{{client_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Visualizar Cliente por ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/clients/{{client_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"clients",
+								"{{client_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Clientes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/clients",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"clients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Cliente por nome",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/clients?name=silva",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"clients"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "silva"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Cliente por CPF",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/clients?cpf=510.797.250-08",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"clients"
+							],
+							"query": [
+								{
+									"key": "cpf",
+									"value": "510.797.250-08"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Funcionário",
+			"item": [
+				{
+					"name": "Adicionar Funcionário",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Maria Santos Oliveira\",\r\n  \"email\": \"maria.santos@empresa.com\",\r\n  \"phone\": \"(11) 98765-4321\",\r\n  \"cpf\": \"782.135.500-30\",\r\n  \"street\": \"Rua das Palmeiras, 123\",\r\n  \"city\": \"São Paulo\",\r\n  \"state\": \"SP\",\r\n  \"zip_code\": \"01234-567\",\r\n  \"country\": \"Brasil\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/employees",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"employees"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Funcionário",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Maria Santos Oliveira\",\r\n  \"email\": \"maria.santos@empresa.com\",\r\n  \"phone\": \"(11) 98765-4321\",\r\n  \"cpf\": \"782.135.500-30\",\r\n  \"street\": \"Rua das Palmeiras, 456\",\r\n  \"city\": \"São Paulo\",\r\n  \"state\": \"SP\",\r\n  \"zip_code\": \"01234-567\",\r\n  \"country\": \"Brasil\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/employees/{{employee_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"employees",
+								"{{employee_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remover Funcionário",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/employees/{{employee_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"employees",
+								"{{employee_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Visualizar Funcionário por ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/employees/{{employee_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"employees",
+								"{{employee_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Funcionários",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/employees",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"employees"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Funcionário por nome",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/employees?name=santos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"employees"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "santos"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Inativar Funcionário por ID",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/employees/{{employee_id}}/deactivate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"employees",
+								"{{employee_id}}",
+								"deactivate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ativar Funcionário por ID",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/employees/{{employee_id}}/activate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"employees",
+								"{{employee_id}}",
+								"activate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Venda",
+			"item": [
+				{
+					"name": "Listar Vendas por valor",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/sales?order_by_value=asc",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"sales"
+							],
+							"query": [
+								{
+									"key": "order_by_value",
+									"value": "asc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Vendas por status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/sales?status=confirmada",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"sales"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "confirmada"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Vendas por funcionário",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/sales?employee_id={{employee_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"sales"
+							],
+							"query": [
+								{
+									"key": "employee_id",
+									"value": "{{employee_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Adicionar Venda",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"client_id\": 1,\r\n  \"employee_id\": 1,\r\n  \"vehicle_id\": 1,\r\n  \"total_amount\": 85000.00,\r\n  \"payment_method\": \"Financiamento\",\r\n  \"sale_date\": \"2024-01-15\",\r\n  \"notes\": \"Venda realizada com garantia estendida de 3 anos\",\r\n  \"discount_amount\": 5000.00,\r\n  \"tax_amount\": 1500.00,\r\n  \"commission_rate\": 2.50\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/sales/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"sales",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Venda",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"client_id\": 1,\r\n  \"employee_id\": 1,\r\n  \"vehicle_id\": 1,\r\n  \"total_amount\": 85000.00,\r\n  \"payment_method\": \"Financiamento\",\r\n  \"sale_date\": \"2025-01-15\",\r\n  \"notes\": \"Venda realizada com garantia estendida de 2 anos\",\r\n  \"discount_amount\": 5000.00,\r\n  \"tax_amount\": 1500.00,\r\n  \"commission_rate\": 2.50\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/sales/{{sale_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"sales",
+								"{{sale_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remover Venda",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/sales/{{sale_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"sales",
+								"{{sale_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Visualizar Venda por ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/sales/{{sale_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"sales",
+								"{{sale_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar status para venda confirmada",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/sales/{{sale_id}}/confirm",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"sales",
+								"{{sale_id}}",
+								"confirm"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Mensagem",
+			"item": [
+				{
+					"name": "Enviar Mensagem",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Marco José\",\r\n  \"email\": \"marco@email.com\", \r\n  \"phone\": \"(11) 99999-9999\",\r\n  \"message\": \"Interesse no Civic 2023\",\r\n  \"vehicle_id\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/messages",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"messages"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Mensagens por status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/messages?status=Pendente",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "Pendente"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Mensagens por funcionário responsável",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/messages?responsible_id={{employee_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "responsible_id",
+									"value": "{{employee_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Mensagens por veículo",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/messages?vehicle_id={{car_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "vehicle_id",
+									"value": "{{car_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Iniciar atendimento",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"responsible_id\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/messages/{{message_id}}/start-service",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"messages",
+								"{{message_id}}",
+								"start-service"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/messages/{{message_id}}/finished",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"messages",
+								"{{message_id}}",
+								"finished"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Imagens",
+			"item": [
+				{
+					"name": "Carro",
+					"item": [
+						{
+							"name": "Adicionar imagens",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "files",
+											"type": "file",
+											"src": "/C:/Users/Leonardo/Pictures/Captura de tela 2025-01-24 080125.png"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}:{{port}}/api/vehicles/cars/{{car_id}}/images",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"vehicles",
+										"cars",
+										"{{car_id}}",
+										"images"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Listar imagens",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}:{{port}}/api/vehicles/cars/{{car_id}}/images",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"vehicles",
+										"cars",
+										"{{car_id}}",
+										"images"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Deletar imagem",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}:{{port}}/api/vehicles/cars/{{car_id}}/images/{{image_id}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"vehicles",
+										"cars",
+										"{{car_id}}",
+										"images",
+										"{{image_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Definir principal",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"image_id\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}:{{port}}/api/vehicles/cars/{{car_id}}/images/primary",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"vehicles",
+										"cars",
+										"{{car_id}}",
+										"images",
+										"primary"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Reordenar imagens",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"image_positions\": [\r\n    {\"image_id\": 1, \"position\": 1}\r\n  ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}:{{port}}/api/vehicles/cars/{{car_id}}/images/reorder",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"vehicles",
+										"cars",
+										"{{car_id}}",
+										"images",
+										"reorder"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Moto",
+					"item": [
+						{
+							"name": "Adicionar imagens",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}:{{port}}/api/vehicles/motorcycles/{{motorcycle_id}}/images",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"vehicles",
+										"motorcycles",
+										"{{motorcycle_id}}",
+										"images"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Listar imagens",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}:{{port}}/api/vehicles/motorcycles/{{motorcycle_id}}/images",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"vehicles",
+										"motorcycles",
+										"{{motorcycle_id}}",
+										"images"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Deletar imagem",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}:{{port}}/api/vehicles/motorcycles/{{motorcycle_id}}/images/{{image_id}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"vehicles",
+										"motorcycles",
+										"{{motorcycle_id}}",
+										"images",
+										"{{image_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Definir principal",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}:{{port}}/api/vehicles/motorcycles/{{motorcycle_id}}/images/primary",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"vehicles",
+										"motorcycles",
+										"{{motorcycle_id}}",
+										"images",
+										"primary"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Reordenar imagens",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"image_positions\": [\r\n    {\"image_id\": 7, \"position\": 1}\r\n  ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}:{{port}}/api/vehicles/motorcycles/{{motorcycle_id}}/images/reorder",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"vehicles",
+										"motorcycles",
+										"{{motorcycle_id}}",
+										"images",
+										"reorder"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Usuário",
+			"item": [
+				{
+					"name": "Autenticar",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Armazenar o token recebido na resposta\r",
+									"let responseJson = pm.response.json();\r",
+									"pm.environment.set(\"access_token\", responseJson.access_token);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"admin@carsales.com\",\r\n  \"password\": \"admin123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Usuário autenticado",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Novo usuário",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"funcionario01@carsales.com\",\r\n  \"password\": \"senha123\",\r\n  \"role\": \"Vendedor\",\r\n  \"employee_id\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar usuário",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"novo@exemplo.com\",\r\n  \"password\": \"senha123\",\r\n  \"role\": \"Vendedor\",\r\n  \"employee_id\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/users/{{user_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"users",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remover usuário",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/users/{{user_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"users",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}:{{port}}/api/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		},
 		{
 			"name": "health check",

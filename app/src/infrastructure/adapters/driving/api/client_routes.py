@@ -2,7 +2,11 @@ from fastapi import APIRouter, HTTPException, status, Depends, Query
 from typing import List, Optional
 from app.src.application.services.client_service import ClientService
 from app.src.application.dtos.client_dto import CreateClientRequest, UpdateClientRequest, ClientResponse, ClientListResponse
+from app.src.application.dtos.user_dto import UserResponseDto
 from app.src.infrastructure.driven.persistence.client_repository_impl import ClientRepository
+from app.src.infrastructure.adapters.driving.api.auth_dependencies import (
+    get_current_admin_or_vendedor_user
+)
 import logging
 
 logger = logging.getLogger(__name__)
@@ -24,14 +28,18 @@ def get_client_service() -> ClientService:
 @router.post("/", response_model=ClientResponse, status_code=status.HTTP_201_CREATED)
 async def create_client(
     request: CreateClientRequest,
-    service: ClientService = Depends(get_client_service)
+    service: ClientService = Depends(get_client_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ) -> ClientResponse:
     """
     Cria um novo cliente.
     
+    Requer autenticação: Administrador ou Vendedor
+    
     Args:
         request: Dados do cliente a ser criado
         service: Serviço de clientes (injetado)
+        current_user: Usuário autenticado
         
     Returns:
         ClientResponse: Dados do cliente criado
@@ -64,14 +72,18 @@ async def create_client(
 @router.get("/{client_id}", response_model=ClientResponse)
 async def get_client_by_id(
     client_id: int,
-    service: ClientService = Depends(get_client_service)
+    service: ClientService = Depends(get_client_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ) -> ClientResponse:
     """
     Busca um cliente pelo ID.
     
+    Requer autenticação: Administrador ou Vendedor
+    
     Args:
         client_id: ID do cliente
         service: Serviço de clientes (injetado)
+        current_user: Usuário autenticado
         
     Returns:
         ClientResponse: Dados do cliente
@@ -108,15 +120,19 @@ async def get_client_by_id(
 async def update_client(
     client_id: int,
     request: UpdateClientRequest,
-    service: ClientService = Depends(get_client_service)
+    service: ClientService = Depends(get_client_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ) -> ClientResponse:
     """
     Atualiza um cliente existente.
     
+    Requer autenticação: Administrador ou Vendedor
+    
     Args:
         client_id: ID do cliente
-        request: Dados para atualização do cliente
+        request: Novos dados do cliente
         service: Serviço de clientes (injetado)
+        current_user: Usuário autenticado
         
     Returns:
         ClientResponse: Dados do cliente atualizado
@@ -158,14 +174,18 @@ async def update_client(
 @router.delete("/{client_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_client(
     client_id: int,
-    service: ClientService = Depends(get_client_service)
+    service: ClientService = Depends(get_client_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ):
     """
     Remove um cliente.
     
+    Requer autenticação: Administrador ou Vendedor
+    
     Args:
         client_id: ID do cliente
         service: Serviço de clientes (injetado)
+        current_user: Usuário autenticado
         
     Raises:
         HTTPException: 404 se não encontrado, 500 se erro interno
@@ -200,10 +220,13 @@ async def get_all_clients(
     limit: int = Query(100, ge=1, le=1000, description="Número máximo de registros para retornar"),
     name: Optional[str] = Query(None, min_length=1, description="Nome ou parte do nome para filtrar (opcional)"),
     cpf: Optional[str] = Query(None, min_length=11, max_length=14, description="CPF para filtrar (opcional)"),
-    service: ClientService = Depends(get_client_service)
+    service: ClientService = Depends(get_client_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ) -> List[ClientListResponse]:
     """
     Lista todos os clientes com paginação e filtros opcionais por nome ou CPF.
+    
+    Requer autenticação: Administrador ou Vendedor
     
     Args:
         skip: Número de registros para pular
@@ -211,6 +234,7 @@ async def get_all_clients(
         name: Nome ou parte do nome para filtrar (opcional)
         cpf: CPF para filtrar (opcional)
         service: Serviço de clientes (injetado)
+        current_user: Usuário autenticado
         
     Returns:
         List[ClientListResponse]: Lista de clientes

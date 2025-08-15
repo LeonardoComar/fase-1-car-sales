@@ -10,7 +10,11 @@ from app.src.application.dtos.message_dto import (
     MessageCreatedResponse,
     MessageStatus
 )
+from app.src.application.dtos.user_dto import UserResponseDto
 from app.src.infrastructure.driven.persistence.message_repository_impl import MessageRepositoryImpl
+from app.src.infrastructure.adapters.driving.api.auth_dependencies import (
+    get_current_admin_or_vendedor_user
+)
 
 router = APIRouter(prefix="/messages", tags=["Messages"])
 
@@ -42,10 +46,13 @@ async def list_messages(
     vehicle_id: Optional[int] = Query(None, description="Filtrar por ID do veículo"),
     page: int = Query(1, ge=1, description="Número da página"),
     limit: int = Query(10, ge=1, le=100, description="Itens por página"),
-    message_service: MessageService = Depends(get_message_service)
+    message_service: MessageService = Depends(get_message_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ):
     """
     Listar mensagens com filtros opcionais.
+    
+    Requer autenticação: Administrador ou Vendedor
     
     Filtros disponíveis:
     - status: Filtrar por status da mensagem
@@ -67,10 +74,13 @@ async def list_messages(
 async def start_service(
     message_id: int,
     request: MessageStartServiceRequest,
-    message_service: MessageService = Depends(get_message_service)
+    message_service: MessageService = Depends(get_message_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ):
     """
     Iniciar atendimento de uma mensagem.
+    
+    Requer autenticação: Administrador ou Vendedor
     
     Ações realizadas:
     - Atribui responsible_id
@@ -88,10 +98,13 @@ async def start_service(
 async def update_status(
     message_id: int,
     request: MessageUpdateStatusRequest,
-    message_service: MessageService = Depends(get_message_service)
+    message_service: MessageService = Depends(get_message_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ):
     """
     Atualizar status de uma mensagem.
+    
+    Requer autenticação: Administrador ou Vendedor
     
     Status disponíveis:
     - Pendente
@@ -109,9 +122,14 @@ async def update_status(
 @router.get("/{message_id}", response_model=MessageResponse)
 async def get_message(
     message_id: int,
-    message_service: MessageService = Depends(get_message_service)
+    message_service: MessageService = Depends(get_message_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ):
-    """Buscar mensagem por ID"""
+    """
+    Buscar mensagem por ID
+    
+    Requer autenticação: Administrador ou Vendedor
+    """
     try:
         return message_service.get_message_by_id(message_id)
     except ValueError as e:
@@ -123,9 +141,10 @@ async def get_message(
 @router.patch("/{message_id}/pending", response_model=MessageResponse)
 async def set_pending_status(
     message_id: int,
-    message_service: MessageService = Depends(get_message_service)
+    message_service: MessageService = Depends(get_message_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ):
-    """Definir status como 'Pendente'"""
+    """Definir status como 'Pendente' - Requer autenticação: Administrador ou Vendedor"""
     request = MessageUpdateStatusRequest(status=MessageStatus.PENDING)
     try:
         return message_service.update_status(message_id, request)
@@ -137,9 +156,10 @@ async def set_pending_status(
 @router.patch("/{message_id}/contact-initiated", response_model=MessageResponse)
 async def set_contact_initiated_status(
     message_id: int,
-    message_service: MessageService = Depends(get_message_service)
+    message_service: MessageService = Depends(get_message_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ):
-    """Definir status como 'Contato iniciado'"""
+    """Definir status como 'Contato iniciado' - Requer autenticação: Administrador ou Vendedor"""
     request = MessageUpdateStatusRequest(status=MessageStatus.CONTACT_INITIATED)
     try:
         return message_service.update_status(message_id, request)
@@ -151,9 +171,10 @@ async def set_contact_initiated_status(
 @router.patch("/{message_id}/finished", response_model=MessageResponse)
 async def set_finished_status(
     message_id: int,
-    message_service: MessageService = Depends(get_message_service)
+    message_service: MessageService = Depends(get_message_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ):
-    """Definir status como 'Finalizado'"""
+    """Definir status como 'Finalizado' - Requer autenticação: Administrador ou Vendedor"""
     request = MessageUpdateStatusRequest(status=MessageStatus.FINISHED)
     try:
         return message_service.update_status(message_id, request)
@@ -165,9 +186,10 @@ async def set_finished_status(
 @router.patch("/{message_id}/cancelled", response_model=MessageResponse)
 async def set_cancelled_status(
     message_id: int,
-    message_service: MessageService = Depends(get_message_service)
+    message_service: MessageService = Depends(get_message_service),
+    current_user: UserResponseDto = Depends(get_current_admin_or_vendedor_user)
 ):
-    """Definir status como 'Cancelado'"""
+    """Definir status como 'Cancelado' - Requer autenticação: Administrador ou Vendedor"""
     request = MessageUpdateStatusRequest(status=MessageStatus.CANCELLED)
     try:
         return message_service.update_status(message_id, request)

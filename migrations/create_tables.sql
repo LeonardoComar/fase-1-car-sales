@@ -63,13 +63,28 @@ CREATE TABLE employees (
 
 CREATE TABLE users (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    email VARCHAR(100),
-    password VARCHAR(255),
-    role VARCHAR(50),
-    employee_id BIGINT UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL,
+    employee_id BIGINT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE SET NULL,
+    INDEX idx_email (email),
+    INDEX idx_role (role),
+    INDEX idx_employee_id (employee_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE blacklisted_tokens (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    jti VARCHAR(255) NOT NULL UNIQUE,
+    token VARCHAR(1000) NOT NULL,
+    user_id BIGINT NOT NULL,
+    blacklisted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL,
+    INDEX idx_jti (jti),
+    INDEX idx_user_id (user_id),
+    INDEX idx_expires_at (expires_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE clients (
