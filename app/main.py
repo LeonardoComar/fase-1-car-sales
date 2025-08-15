@@ -26,9 +26,37 @@ async def lifespan(app: FastAPI):
     logger.info("Finalizando aplicação Car Sales")
 
 app = FastAPI(
-    title="Car Sales API",
-    description="API para gerenciamento de vendas de carros",
+    title="🚗 Car Sales API",
+    description="""
+    ## Sistema Completo de Vendas de Veículos
+    
+    API RESTful para gerenciamento de vendas de carros e motocicletas com arquitetura hexagonal.
+    
+    ### ✨ Principais Funcionalidades:
+    
+    * **🚗 Veículos**: CRUD completo para carros e motocicletas
+    * **📸 Imagens**: Upload, gerenciamento e organização de imagens dos veículos
+    * **👥 Clientes**: Gestão completa de clientes
+    * **👨‍💼 Funcionários**: Controle de colaboradores
+    * **💰 Vendas**: Registro e acompanhamento de vendas
+    * **💬 Mensagens**: Sistema de comunicação e atendimento
+    * **🔍 Filtros**: Busca avançada com múltiplos critérios
+    
+    ### 📖 Como usar:
+    1. Explore os endpoints abaixo
+    2. Use as collections do Postman na pasta `Postman/`
+    3. Consulte a documentação completa na pasta `Documentação/`
+    """,
     version="1.0.0",
+    contact={
+        "name": "Leonardo Comar",
+        "url": "https://github.com/LeonardoComar",
+        "email": "leonardo.comar@exemplo.com"
+    },
+    license_info={
+        "name": "MIT License",
+        "url": "https://opensource.org/licenses/MIT"
+    },
     lifespan=lifespan
 )
 
