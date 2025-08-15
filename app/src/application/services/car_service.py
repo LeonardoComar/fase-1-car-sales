@@ -1,0 +1,326 @@
+from typing import Optional, List
+from app.src.domain.ports.car_repository import CarRepositoryInterface
+from app.src.domain.entities.car_model import Car
+from app.src.domain.entities.motor_vehicle_model import MotorVehicle
+from app.src.application.dtos.car_dto import CreateCarRequest, CarResponse, CarsListResponse, VehicleImageInfo
+from app.src.infrastructure.driven.persistence.vehicle_image_repository_impl import VehicleImageRepositoryImpl
+from decimal import Decimal
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class CarService:
+    """
+    Serviço de aplicação para operações relacionadas a carros.
+    Coordena as operações entre a camada de apresentação e o domínio.
+    """
+    
+    def __init__(self, car_repository: CarRepositoryInterface):
+        self.car_repository = car_repository
+        self.vehicle_image_repository = VehicleImageRepositoryImpl()
+    
+    async def create_car(self, request: CreateCarRequest) -> CarResponse:
+        """
+        Cria um novo carro.
+        
+        Args:
+            request: Dados para criação do carro
+            
+        Returns:
+            CarResponse: Dados do carro criado
+            
+        Raises:
+            Exception: Se houver erro na criação
+        """
+        try:
+            logger.info(f"Iniciando criação de carro: {request.model}")
+            
+            # Criar entidades do domínio
+            motor_vehicle, car = Car.create_with_motor_vehicle(
+                model=request.model,
+                year=request.year,
+                mileage=request.mileage,
+                fuel_type=request.fuel_type,
+                color=request.color,
+                city=request.city,
+                price=request.price,
+                bodywork=request.bodywork,
+                transmission=request.transmission,
+                additional_description=request.additional_description
+            )
+            
+            # Persistir no repositório
+            created_car = await self.car_repository.create_car(motor_vehicle, car)
+            
+            # Converter para DTO de resposta
+            response = self._car_to_response(created_car)
+            
+            logger.info(f"Carro criado com sucesso. ID: {response.id}")
+            return response
+            
+        except Exception as e:
+            logger.error(f"Erro ao criar carro: {str(e)}")
+            raise Exception(f"Erro ao criar carro: {str(e)}")
+    
+    async def get_car_by_id(self, car_id: int) -> Optional[CarResponse]:
+        """
+        Busca um carro pelo ID.
+        
+        Args:
+            car_id: ID do carro
+            
+        Returns:
+            Optional[CarResponse]: Dados do carro ou None se não encontrado
+        """
+        try:
+            logger.info(f"Buscando carro por ID: {car_id}")
+            
+            car = await self.car_repository.get_car_by_id(car_id)
+            if not car:
+                logger.info(f"Carro não encontrado. ID: {car_id}")
+                return None
+            
+            response = self._car_to_response(car)
+            logger.info(f"Carro encontrado. ID: {car_id}")
+            return response
+            
+        except Exception as e:
+            logger.error(f"Erro ao buscar carro por ID {car_id}: {str(e)}")
+            raise Exception(f"Erro ao buscar carro: {str(e)}")
+    
+    async def update_car(self, car_id: int, request: CreateCarRequest) -> Optional[CarResponse]:
+        """
+        Atualiza um carro existente.
+        
+        Args:
+            car_id: ID do carro
+            request: Novos dados do carro
+            
+        Returns:
+            Optional[CarResponse]: Dados do carro atualizado ou None se não encontrado
+        """
+        try:
+            logger.info(f"Atualizando carro ID: {car_id}")
+            
+            # Criar entidades do domínio com todos os novos dados
+            motor_vehicle = MotorVehicle(
+                id=car_id,
+                model=request.model,
+                year=request.year,
+                mileage=request.mileage,
+                fuel_type=request.fuel_type,
+                color=request.color,
+                city=request.city,
+                price=request.price,
+                additional_description=request.additional_description
+            )
+            
+            car = Car(
+                vehicle_id=car_id,
+                bodywork=request.bodywork,
+                transmission=request.transmission
+            )
+            
+            # Atualizar no repositório
+            updated_car = await self.car_repository.update_car(car_id, motor_vehicle, car)
+            if not updated_car:
+                logger.info(f"Carro não encontrado para atualização. ID: {car_id}")
+                return None
+            
+            response = self._car_to_response(updated_car)
+            logger.info(f"Carro atualizado com sucesso. ID: {car_id}")
+            return response
+            
+        except Exception as e:
+            logger.error(f"Erro ao atualizar carro ID {car_id}: {str(e)}")
+            raise Exception(f"Erro ao atualizar carro: {str(e)}")
+    
+    async def delete_car(self, car_id: int) -> bool:
+        """
+        Remove um carro.
+        
+        Args:
+            car_id: ID do carro
+            
+        Returns:
+            bool: True se removido com sucesso, False se não encontrado
+        """
+        try:
+            logger.info(f"Removendo carro ID: {car_id}")
+            
+            result = await self.car_repository.delete_car(car_id)
+            if result:
+                logger.info(f"Carro removido com sucesso. ID: {car_id}")
+            else:
+                logger.info(f"Carro não encontrado para remoção. ID: {car_id}")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Erro ao remover carro ID {car_id}: {str(e)}")
+            raise Exception(f"Erro ao remover carro: {str(e)}")
+    
+    async def inactivate_car(self, car_id: int) -> Optional[CarResponse]:
+        """
+        Inativa um carro alterando seu status para 'Inativo'.
+        
+        Args:
+            car_id: ID do carro
+            
+        Returns:
+            Optional[CarResponse]: Dados do carro inativado ou None se não encontrado
+        """
+        try:
+            logger.info(f"Inativando carro ID: {car_id}")
+            
+            # Buscar o carro atual
+            current_car = await self.car_repository.get_car_by_id(car_id)
+            if not current_car:
+                logger.info(f"Carro não encontrado para inativação. ID: {car_id}")
+                return None
+            
+            # Criar entidade motor_vehicle com status 'Inativo', mantendo os outros dados
+            motor_vehicle = current_car.motor_vehicle
+            motor_vehicle.status = 'Inativo'
+            
+            # Atualizar no repositório
+            updated_car = await self.car_repository.update_car(car_id, motor_vehicle, current_car)
+            if not updated_car:
+                logger.info(f"Falha ao inativar carro. ID: {car_id}")
+                return None
+            
+            response = self._car_to_response(updated_car)
+            logger.info(f"Carro inativado com sucesso. ID: {car_id}")
+            return response
+            
+        except Exception as e:
+            logger.error(f"Erro ao inativar carro ID {car_id}: {str(e)}")
+            raise Exception(f"Erro ao inativar carro: {str(e)}")
+    
+    async def activate_car(self, car_id: int) -> Optional[CarResponse]:
+        """
+        Ativa um carro alterando seu status para 'Ativo'.
+        
+        Args:
+            car_id: ID do carro
+            
+        Returns:
+            Optional[CarResponse]: Dados do carro ativado ou None se não encontrado
+        """
+        try:
+            logger.info(f"Ativando carro ID: {car_id}")
+            
+            # Buscar o carro atual
+            current_car = await self.car_repository.get_car_by_id(car_id)
+            if not current_car:
+                logger.info(f"Carro não encontrado para ativação. ID: {car_id}")
+                return None
+            
+            # Criar entidade motor_vehicle com status 'Ativo', mantendo os outros dados
+            motor_vehicle = current_car.motor_vehicle
+            motor_vehicle.status = 'Ativo'
+            
+            # Atualizar no repositório
+            updated_car = await self.car_repository.update_car(car_id, motor_vehicle, current_car)
+            if not updated_car:
+                logger.info(f"Falha ao ativar carro. ID: {car_id}")
+                return None
+            
+            response = self._car_to_response(updated_car)
+            logger.info(f"Carro ativado com sucesso. ID: {car_id}")
+            return response
+            
+        except Exception as e:
+            logger.error(f"Erro ao ativar carro ID {car_id}: {str(e)}")
+            raise Exception(f"Erro ao ativar carro: {str(e)}")
+    
+    async def get_cars_with_filters(self, skip: int = 0, limit: int = 100, order_by_price: Optional[str] = None, 
+                                   status: Optional[str] = None, min_price: Optional[Decimal] = None, 
+                                   max_price: Optional[Decimal] = None) -> CarsListResponse:
+        """
+        Busca carros com filtros opcionais.
+        
+        Args:
+            skip: Número de registros para pular
+            limit: Número máximo de registros para retornar
+            order_by_price: Ordenação por preço - 'asc' ou 'desc' (opcional)
+            status: Status dos carros para filtrar (opcional)
+            min_price: Preço mínimo para filtrar (opcional)
+            max_price: Preço máximo para filtrar (opcional)
+            
+        Returns:
+            CarsListResponse: Lista de carros com metadados
+        """
+        try:
+            logger.info(f"Buscando carros com filtros. Order: {order_by_price}, Status: {status}, Range: {min_price}-{max_price}")
+            
+            cars = await self.car_repository.get_all_cars(
+                skip=skip, 
+                limit=limit, 
+                order_by_price=order_by_price,
+                status=status,
+                min_price=min_price,
+                max_price=max_price
+            )
+            
+            # Converter para DTOs de resposta
+            car_responses = [self._car_to_response(car) for car in cars]
+            
+            response = CarsListResponse(
+                cars=car_responses,
+                total=len(car_responses),
+                skip=skip,
+                limit=limit
+            )
+            
+            logger.info(f"Encontrados {len(car_responses)} carros com filtros")
+            return response
+            
+        except Exception as e:
+            logger.error(f"Erro ao buscar carros com filtros: {str(e)}")
+            raise Exception(f"Erro ao buscar carros: {str(e)}")
+    
+    def _car_to_response(self, car: Car) -> CarResponse:
+        """
+        Converte uma entidade Car para CarResponse.
+        
+        Args:
+            car: Entidade do domínio
+            
+        Returns:
+            CarResponse: DTO de resposta
+        """
+        motor_vehicle = car.motor_vehicle
+        
+        # Buscar imagens do veículo
+        vehicle_images = self.vehicle_image_repository.find_by_vehicle_id(motor_vehicle.id)
+        
+        # Converter imagens para VehicleImageInfo
+        images = []
+        for img in vehicle_images:
+            images.append(VehicleImageInfo(
+                id=img.id,
+                url=f"/static/uploads/cars/{motor_vehicle.id}/{img.filename}",
+                thumbnail_url=f"/static/uploads/thumbnails/cars/{motor_vehicle.id}/thumb_{img.filename}" if img.thumbnail_path else None,
+                position=img.position,
+                is_primary=img.is_primary
+            ))
+        
+        return CarResponse(
+            id=motor_vehicle.id,
+            model=motor_vehicle.model,
+            year=motor_vehicle.year,
+            mileage=motor_vehicle.mileage,
+            fuel_type=motor_vehicle.fuel_type,
+            color=motor_vehicle.color,
+            city=motor_vehicle.city,
+            price=motor_vehicle.price,
+            additional_description=motor_vehicle.additional_description,
+            status=motor_vehicle.status,
+            bodywork=car.bodywork,
+            transmission=car.transmission,
+            created_at=motor_vehicle.created_at.isoformat() if motor_vehicle.created_at else "",
+            updated_at=motor_vehicle.updated_at.isoformat() if motor_vehicle.updated_at else "",
+            images=images
+        )
