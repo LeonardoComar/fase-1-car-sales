@@ -8,10 +8,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Criar instâncias dos serviços
-car_repository = CarRepository()
-car_service = CarService(car_repository)
-
 router = APIRouter(prefix="/cars", tags=["Cars"])
 
 
@@ -19,6 +15,8 @@ def get_car_service() -> CarService:
     """
     Dependency injection para o serviço de carros.
     """
+    car_repository = CarRepository()
+    car_service = CarService(car_repository)
     return car_service
 
 

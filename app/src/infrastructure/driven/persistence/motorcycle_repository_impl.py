@@ -170,6 +170,31 @@ class MotorcycleRepository(MotorcycleRepositoryInterface):
             logger.error(f"Erro inesperado ao deletar moto ID {motorcycle_id}: {str(e)}")
             raise Exception(f"Erro inesperado ao deletar moto: {str(e)}")
 
+    async def update_vehicle_status(self, vehicle_id: int, status: str) -> bool:
+        """
+        Atualiza apenas o status de um veículo.
+        """
+        try:
+            with get_db_session() as session:
+                motor_vehicle = session.query(MotorVehicle).filter(MotorVehicle.id == vehicle_id).first()
+                
+                if not motor_vehicle:
+                    logger.warning(f"Veículo não encontrado para atualização de status. ID: {vehicle_id}")
+                    return False
+                
+                motor_vehicle.status = status
+                session.commit()
+                
+                logger.info(f"Status do veículo atualizado com sucesso. ID: {vehicle_id}, Status: {status}")
+                return True
+                
+        except SQLAlchemyError as e:
+            logger.error(f"Erro ao atualizar status do veículo ID {vehicle_id}: {str(e)}")
+            raise Exception(f"Erro ao atualizar status do veículo: {str(e)}")
+        except Exception as e:
+            logger.error(f"Erro inesperado ao atualizar status do veículo ID {vehicle_id}: {str(e)}")
+            raise Exception(f"Erro inesperado ao atualizar status do veículo: {str(e)}")
+
     def _apply_price_ordering(self, query, order_by_price: Optional[str]):
         """
         Aplica ordenação por preço na query.

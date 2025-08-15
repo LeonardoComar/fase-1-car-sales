@@ -1,6 +1,9 @@
 from typing import Optional, List
 from app.src.domain.ports.sale_repository import SaleRepositoryInterface
+from app.src.domain.ports.car_repository import CarRepositoryInterface
+from app.src.domain.ports.motorcycle_repository import MotorcycleRepositoryInterface
 from app.src.domain.entities.sale_model import Sale
+from app.src.domain.entities.motor_vehicle_model import MotorVehicle
 from app.src.application.dtos.sale_dto import (
     CreateSaleRequest, UpdateSaleRequest, SaleResponse, 
     SaleListResponse, SalesListResponse, ClientSummary,
@@ -18,8 +21,12 @@ class SaleService:
     Serviço de aplicação para vendas.
     """
 
-    def __init__(self, sale_repository: SaleRepositoryInterface):
+    def __init__(self, sale_repository: SaleRepositoryInterface, 
+                 car_repository: CarRepositoryInterface,
+                 motorcycle_repository: MotorcycleRepositoryInterface):
         self.sale_repository = sale_repository
+        self.car_repository = car_repository
+        self.motorcycle_repository = motorcycle_repository
 
     async def create_sale(self, request: CreateSaleRequest) -> SaleResponse:
         """
@@ -155,6 +162,7 @@ class SaleService:
     async def update_sale_status(self, sale_id: int, status: str) -> Optional[SaleResponse]:
         """
         Atualiza apenas o status de uma venda.
+        Se o status for "Confirmada", também atualiza o status do veículo para "Vendido".
         
         Args:
             sale_id: ID da venda
@@ -170,12 +178,38 @@ class SaleService:
             if not Sale.is_valid_status(status):
                 raise ValueError(f"Status inválido: {status}")
             
+            # Buscar a venda para obter o vehicle_id antes da atualização
+            existing_sale = await self.sale_repository.get_sale_by_id(sale_id)
+            if not existing_sale:
+                logger.warning(f"Venda não encontrada para atualização de status. ID: {sale_id}")
+                return None
+            
+            # Atualizar status da venda
             updated_sale = await self.sale_repository.update_sale_status(sale_id, status)
             
             if not updated_sale:
                 logger.warning(f"Venda não encontrada para atualização de status. ID: {sale_id}")
                 return None
             
+            # Se o status for "Confirmada", atualizar o status do veículo para "Vendido"
+            if status == Sale.STATUS_CONFIRMADA:
+                vehicle_id = existing_sale.vehicle_id
+                logger.info(f"Atualizando status do veículo para 'Vendido'. Vehicle ID: {vehicle_id}")
+                
+                # Tentar atualizar como carro primeiro, depois como moto
+                car_updated = await self.car_repository.update_vehicle_status(vehicle_id, MotorVehicle.STATUS_VENDIDO)
+                
+                if not car_updated:
+                    # Se não foi um carro, tentar como moto
+                    motorcycle_updated = await self.motorcycle_repository.update_vehicle_status(vehicle_id, MotorVehicle.STATUS_VENDIDO)
+                    
+                    if not motorcycle_updated:
+                        logger.warning(f"Não foi possível atualizar o status do veículo ID: {vehicle_id}")
+                    else:
+                        logger.info(f"Status da motocicleta atualizado para 'Vendido'. Vehicle ID: {vehicle_id}")
+                else:
+                    logger.info(f"Status do carro atualizado para 'Vendido'. Vehicle ID: {vehicle_id}")
+
             logger.info(f"Status da venda atualizado com sucesso. ID: {sale_id}")
             return self._convert_to_sale_response(updated_sale)
             

@@ -2,9 +2,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import and_, desc, asc
 from typing import Optional, List
-from app.src.domain.ports.car_repository import CarRepositoryInterface
 from app.src.domain.entities.car_model import Car
 from app.src.domain.entities.motor_vehicle_model import MotorVehicle
+from app.src.domain.ports.car_repository import CarRepositoryInterface
 from app.src.infrastructure.driven.database.connection_mysql import get_db_session
 from decimal import Decimal
 import logging
@@ -154,7 +154,7 @@ class CarRepository(CarRepositoryInterface):
                 
                 session.commit()
                 
-                logger.info(f"Carro removido com sucesso. ID: {car_id}")
+                logger.info(f"Carro deletado com sucesso. ID: {car_id}")
                 return True
                 
         except SQLAlchemyError as e:
@@ -164,79 +164,97 @@ class CarRepository(CarRepositoryInterface):
             logger.error(f"Erro inesperado ao deletar carro ID {car_id}: {str(e)}")
             raise Exception(f"Erro inesperado ao deletar carro: {str(e)}")
 
+    async def update_vehicle_status(self, vehicle_id: int, status: str) -> bool:
+        """
+        Atualiza apenas o status de um veículo.
+        """
+        try:
+            with get_db_session() as session:
+                motor_vehicle = session.query(MotorVehicle).filter(MotorVehicle.id == vehicle_id).first()
+                
+                if not motor_vehicle:
+                    logger.warning(f"Veículo não encontrado para atualização de status. ID: {vehicle_id}")
+                    return False
+                
+                motor_vehicle.status = status
+                session.commit()
+                
+                logger.info(f"Status do veículo atualizado com sucesso. ID: {vehicle_id}, Status: {status}")
+                return True
+                
+        except SQLAlchemyError as e:
+            logger.error(f"Erro ao atualizar status do veículo ID {vehicle_id}: {str(e)}")
+            raise Exception(f"Erro ao atualizar status do veículo: {str(e)}")
+        except Exception as e:
+            logger.error(f"Erro inesperado ao atualizar status do veículo ID {vehicle_id}: {str(e)}")
+            raise Exception(f"Erro inesperado ao atualizar status do veículo: {str(e)}")
+
     def _apply_price_ordering(self, query, order_by_price: Optional[str]):
         """
         Aplica ordenação por preço na query.
-        
-        Args:
-            query: Query do SQLAlchemy
-            order_by_price: 'asc' para crescente, 'desc' para decrescente
-            
-        Returns:
-            Query com ordenação aplicada
         """
-        if order_by_price == 'desc':
-            return query.order_by(desc(MotorVehicle.price))
-        elif order_by_price == 'asc':
+        if order_by_price == 'asc':
             return query.order_by(asc(MotorVehicle.price))
+        elif order_by_price == 'desc':
+            return query.order_by(desc(MotorVehicle.price))
         return query
 
-    async def get_all_cars(self, skip: int = 0, limit: int = 100, order_by_price: Optional[str] = None, 
-                          status: Optional[str] = None, min_price: Optional[Decimal] = None, 
-                          max_price: Optional[Decimal] = None) -> List[Car]:
+    def _apply_filters(self, query, status: Optional[str], min_price: Optional[Decimal], max_price: Optional[Decimal]):
         """
-        Busca todos os carros com filtros opcionais.
+        Aplica filtros na query.
+        """
+        conditions = []
         
-        Args:
-            skip: Número de registros para pular
-            limit: Número máximo de registros para retornar
-            order_by_price: Ordenação por preço - 'asc' ou 'desc' (opcional)
-            status: Status dos carros para filtrar (opcional)
-            min_price: Preço mínimo para filtrar (opcional)
-            max_price: Preço máximo para filtrar (opcional)
-            
-        Returns:
-            List[Car]: Lista de carros encontrados
+        if status:
+            conditions.append(MotorVehicle.status == status)
+        
+        if min_price is not None:
+            conditions.append(MotorVehicle.price >= min_price)
+        
+        if max_price is not None:
+            conditions.append(MotorVehicle.price <= max_price)
+        
+        if conditions:
+            query = query.filter(and_(*conditions))
+        
+        return query
+
+    async def get_all_cars(self, skip: int = 0, limit: int = 100, order_by_price: Optional[str] = None,
+                                   status: Optional[str] = None, min_price: Optional[Decimal] = None,
+                                   max_price: Optional[Decimal] = None) -> List[Car]:
+        """
+        Busca carros com filtros opcionais.
         """
         try:
-            logger.info(f"Buscando carros com filtros. Skip: {skip}, Limit: {limit}, Order: {order_by_price}, Status: {status}, Min Price: {min_price}, Max Price: {max_price}")
-            
             with get_db_session() as session:
-                # Query base juntando as tabelas
-                query = session.query(Car).join(MotorVehicle)
+                # Query base
+                query = session.query(Car, MotorVehicle).join(
+                    MotorVehicle, Car.vehicle_id == MotorVehicle.id
+                )
                 
-                # Aplicar filtros condicionalmente
-                filters = []
+                # Aplicar filtros
+                query = self._apply_filters(query, status, min_price, max_price)
                 
-                if status:
-                    filters.append(MotorVehicle.status == status)
-                
-                if min_price is not None:
-                    filters.append(MotorVehicle.price >= min_price)
-                
-                if max_price is not None:
-                    filters.append(MotorVehicle.price <= max_price)
-                
-                # Aplicar todos os filtros se houver algum
-                if filters:
-                    query = query.filter(and_(*filters))
-                
-                # Aplicar ordenação por preço se especificada
+                # Aplicar ordenação
                 query = self._apply_price_ordering(query, order_by_price)
                 
                 # Aplicar paginação
-                cars = query.offset(skip).limit(limit).all()
+                query = query.offset(skip).limit(limit)
                 
-                # Carregar eager load dos relacionamentos para evitar lazy loading
-                for car in cars:
-                    # Forçar o carregamento do motor_vehicle
-                    _ = car.motor_vehicle.model
-                    
+                # Executar query
+                results = query.all()
+                
+                # Montar objetos Car com motor_vehicle associado
+                cars = []
+                for car, motor_vehicle in results:
                     # Fazer expunge para desconectar os objetos da sessão
-                    session.expunge(car.motor_vehicle)
                     session.expunge(car)
+                    session.expunge(motor_vehicle)
+                    
+                    # Associar o motor_vehicle ao car
+                    car.motor_vehicle = motor_vehicle
+                    cars.append(car)
                 
-                logger.info(f"Encontrados {len(cars)} carros com os filtros aplicados")
                 return cars
                 
         except SQLAlchemyError as e:

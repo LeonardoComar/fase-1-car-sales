@@ -6,6 +6,8 @@ from app.src.application.dtos.sale_dto import (
     SaleResponse, SaleListResponse, SalesListResponse
 )
 from app.src.infrastructure.driven.persistence.sale_repository_impl import SaleRepositoryImpl
+from app.src.infrastructure.driven.persistence.car_repository_impl import CarRepository
+from app.src.infrastructure.driven.persistence.motorcycle_repository_impl import MotorcycleRepository
 from datetime import date
 import logging
 
@@ -23,7 +25,9 @@ def get_sale_service() -> SaleService:
         SaleService: Instância do serviço de vendas
     """
     sale_repository = SaleRepositoryImpl()
-    return SaleService(sale_repository)
+    car_repository = CarRepository()
+    motorcycle_repository = MotorcycleRepository()
+    return SaleService(sale_repository, car_repository, motorcycle_repository)
 
 
 @router.post("/", response_model=SaleResponse, status_code=201)

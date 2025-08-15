@@ -12,6 +12,15 @@ class MotorVehicle(Base):
     """
     __tablename__ = 'motor_vehicles'
 
+    # Status possíveis para veículos
+    STATUS_ATIVO = "Ativo"
+    STATUS_INATIVO = "Inativo"
+    STATUS_VENDIDO = "Vendido"
+    STATUS_RESERVADO = "Reservado"
+    STATUS_MANUTENCAO = "Em Manutenção"
+    
+    VALID_STATUSES = [STATUS_ATIVO, STATUS_INATIVO, STATUS_VENDIDO, STATUS_RESERVADO, STATUS_MANUTENCAO]
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     model = Column(String(100), nullable=False)
     year = Column(String(20), nullable=False)
@@ -21,13 +30,13 @@ class MotorVehicle(Base):
     city = Column(String(100), nullable=False)
     additional_description = Column(Text, nullable=True)
     price = Column(DECIMAL(12, 2), nullable=False)
-    status = Column(String(50), nullable=False, default='Ativo')
+    status = Column(String(50), nullable=False, default=STATUS_ATIVO)
     created_at = Column(TIMESTAMP, default=func.current_timestamp())
     updated_at = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=func.current_timestamp())
 
     def __init__(self, model: str, year: str, mileage: int, fuel_type: str, 
                  color: str, city: str, price: Decimal, additional_description: Optional[str] = None, 
-                 status: str = 'Ativo', id: Optional[int] = None):
+                 status: str = STATUS_ATIVO, id: Optional[int] = None):
         if id is not None:
             self.id = id
         if price <= 0:

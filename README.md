@@ -33,7 +33,7 @@ O **Car Sales API** é um sistema completo para gerenciamento de vendas de veíc
 
 ### 🛠️ Stack Tecnológico
 
-- **🐍 Python 3.12** - Linguagem principal
+- **🐍 Python 3.13** - Linguagem principal
 - **⚡ FastAPI** - Framework web moderno e rápido
 - **🗄️ MySQL 8.0** - Banco de dados relacional
 - **📊 SQLAlchemy** - ORM para Python
@@ -59,7 +59,7 @@ O **Car Sales API** é um sistema completo para gerenciamento de vendas de veíc
 
 2. **Configure as variáveis de ambiente:**
    ```bash
-   # Renomeie o arquivo de exemplo
+   # Renomeie o arquivo de exemplo para .env
    cp .env.example .env
    ```
 

@@ -88,3 +88,17 @@ class CarRepositoryInterface(ABC):
             List[Car]: Lista de carros encontrados
         """
         pass
+
+    @abstractmethod
+    async def update_vehicle_status(self, vehicle_id: int, status: str) -> bool:
+        """
+        Atualiza apenas o status de um veículo.
+        
+        Args:
+            vehicle_id: ID do veículo
+            status: Novo status do veículo
+            
+        Returns:
+            bool: True se atualizado com sucesso, False caso contrário
+        """
+        pass
